@@ -494,7 +494,7 @@ $(CONFIGURED_OFILES): stamp-picdir
 ./_doprnt.$(objext): $(srcdir)/_doprnt.c config.h $(INCDIR)/ansidecl.h \
 	$(INCDIR)/safe-ctype.h
 	if [ x"$(PICFLAG)" != x ]; then \
-	  $(COMPILE.c) $(PICFLAG) $(srcdir)/_doprnt.c -o pic/$@; \
+	  $(COMPILE.c) $(PICFLAG) -std=c99 $(srcdir)/_doprnt.c -o pic/$@; \
 	else true; fi
 	$(COMPILE.c) -std=c99 $(srcdir)/_doprnt.c $(OUTPUT_OPTION)
 

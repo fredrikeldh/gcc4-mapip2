@@ -2303,7 +2303,7 @@ build_array_ref (location_t loc, tree array, tree index)
       if (TREE_CODE (TREE_TYPE (index)) != ARRAY_TYPE
 	  && TREE_CODE (TREE_TYPE (index)) != POINTER_TYPE)
 	{
-          error_at (loc, 
+          error_at (loc,
             "subscripted value is neither array nor pointer nor vector");
 
 	  return error_mark_node;
@@ -2335,8 +2335,8 @@ build_array_ref (location_t loc, tree array, tree index)
   index = default_conversion (index);
 
   gcc_assert (TREE_CODE (TREE_TYPE (index)) == INTEGER_TYPE);
-  
-  /* For vector[index], convert the vector to a 
+
+  /* For vector[index], convert the vector to a
      pointer of the underlying type.  */
   if (TREE_CODE (TREE_TYPE (array)) == VECTOR_TYPE)
     {
@@ -2344,11 +2344,11 @@ build_array_ref (location_t loc, tree array, tree index)
       tree type1;
 
       if (TREE_CODE (index) == INTEGER_CST)
-        if (!host_integerp (index, 1) 
-            || ((unsigned HOST_WIDE_INT) tree_low_cst (index, 1) 
+        if (!host_integerp (index, 1)
+            || ((unsigned HOST_WIDE_INT) tree_low_cst (index, 1)
                >= TYPE_VECTOR_SUBPARTS (TREE_TYPE (array))))
           warning_at (loc, OPT_Warray_bounds, "index value is out of bound");
-     
+
       c_common_mark_addressable_vec (array);
       type = build_qualified_type (TREE_TYPE (type), TYPE_QUALS (type));
       type = build_pointer_type (type);
@@ -3145,7 +3145,7 @@ convert_arguments (tree typelist, VEC(tree,gc) *values,
       else if ((invalid_func_diag =
 		targetm.calls.invalid_arg_for_unprototyped_fn (typelist, fundecl, val)))
 	{
-	  error (invalid_func_diag);
+	  error ("%s", invalid_func_diag);
 	  return -1;
 	}
       else
@@ -3164,7 +3164,7 @@ convert_arguments (tree typelist, VEC(tree,gc) *values,
 
   if (typetail != 0 && TREE_VALUE (typetail) != void_type_node)
     {
-      error_at (input_location, 
+      error_at (input_location,
 		"too few arguments to function %qE", function);
       if (fundecl && !DECL_BUILT_IN (fundecl))
 	inform (DECL_SOURCE_LOCATION (fundecl), "declared here");
@@ -3432,7 +3432,7 @@ build_unary_op (location_t location,
   if ((invalid_op_diag
        = targetm.invalid_unary_op (code, TREE_TYPE (xarg))))
     {
-      error_at (location, invalid_op_diag);
+      error_at (location, "%s", invalid_op_diag);
       return error_mark_node;
     }
 
@@ -3563,7 +3563,7 @@ build_unary_op (location_t location,
 
       /* Complain about anything that is not a true lvalue.  In
 	 Objective-C, skip this check for property_refs.  */
-      if (!objc_is_property_ref (arg) 
+      if (!objc_is_property_ref (arg)
 	  && !lvalue_or_else (location,
 			      arg, ((code == PREINCREMENT_EXPR
 				     || code == POSTINCREMENT_EXPR)
@@ -3680,7 +3680,7 @@ build_unary_op (location_t location,
 	   need to ask Objective-C to build the increment or decrement
 	   expression for it.  */
 	if (objc_is_property_ref (arg))
-	  return objc_build_incr_expr_for_property_ref (location, code, 
+	  return objc_build_incr_expr_for_property_ref (location, code,
 							arg, inc);
 
 	/* Report a read-only lvalue.  */
@@ -5913,7 +5913,7 @@ error_init (const char *gmsgid)
   char *ofwhat;
 
   /* The gmsgid may be a format string with %< and %>. */
-  error (gmsgid);
+  error ("%s", gmsgid);
   ofwhat = print_spelling ((char *) alloca (spelling_length () + 1));
   if (*ofwhat)
     error ("(near initialization for %qs)", ofwhat);
@@ -5928,9 +5928,9 @@ void
 pedwarn_init (location_t location, int opt, const char *gmsgid)
 {
   char *ofwhat;
-  
+
   /* The gmsgid may be a format string with %< and %>. */
-  pedwarn (location, opt, gmsgid);
+  pedwarn (location, opt, "%s", gmsgid);
   ofwhat = print_spelling ((char *) alloca (spelling_length () + 1));
   if (*ofwhat)
     pedwarn (location, opt, "(near initialization for %qs)", ofwhat);
@@ -5948,7 +5948,7 @@ warning_init (int opt, const char *gmsgid)
   char *ofwhat;
 
   /* The gmsgid may be a format string with %< and %>. */
-  warning (opt, gmsgid);
+  warning (opt, "%s", gmsgid);
   ofwhat = print_spelling ((char *) alloca (spelling_length () + 1));
   if (*ofwhat)
     warning (opt, "(near initialization for %qs)", ofwhat);
@@ -9455,7 +9455,7 @@ build_binary_op (location_t location, enum tree_code code,
   if ((invalid_op_diag
        = targetm.invalid_binary_op (code, type0, type1)))
     {
-      error_at (location, invalid_op_diag);
+      error_at (location, "%s", invalid_op_diag);
       return error_mark_node;
     }
 
@@ -9801,7 +9801,7 @@ build_binary_op (location_t location, enum tree_code code,
 	    {
 	      if (code == EQ_EXPR)
 		warning_at (location,
-			    OPT_Waddress, 
+			    OPT_Waddress,
 			    "the comparison will always evaluate as %<false%> "
 			    "for the address of %qD will never be NULL",
 			    TREE_OPERAND (op1, 0));

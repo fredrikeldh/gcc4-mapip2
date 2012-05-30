@@ -136,9 +136,9 @@ _cpp_builtin_macro_text (cpp_reader *pfile, cpp_hashnode *node)
             struct _cpp_file *file = cpp_get_file (pbuffer);
 	    if (file)
 	      {
-    		/* Generate __TIMESTAMP__ string, that represents 
-		   the date and time of the last modification 
-		   of the current source file. The string constant 
+    		/* Generate __TIMESTAMP__ string, that represents
+		   the date and time of the last modification
+		   of the current source file. The string constant
 		   looks like "Sun Sep 16 01:03:52 1973".  */
 		struct tm *tb = NULL;
 		struct stat *st = _cpp_get_file_stat (file);
@@ -200,8 +200,8 @@ _cpp_builtin_macro_text (cpp_reader *pfile, cpp_hashnode *node)
       /* If __LINE__ is embedded in a macro, it must expand to the
 	 line of the macro's invocation, not its definition.
 	 Otherwise things like assert() will not work properly.  */
-      number = SOURCE_LINE (map, 
-			    CPP_OPTION (pfile, traditional) 
+      number = SOURCE_LINE (map,
+			    CPP_OPTION (pfile, traditional)
 			    ? pfile->line_table->highest_line
 			    : pfile->cur_token[-1].src_loc);
       break;
@@ -254,7 +254,7 @@ _cpp_builtin_macro_text (cpp_reader *pfile, cpp_hashnode *node)
 	    {
 	      cpp_errno (pfile, CPP_DL_WARNING,
 			 "could not determine date and time");
-		
+
 	      pfile->date = UC"\"??? ?? ????\"";
 	      pfile->time = UC"\"??:??:??\"";
 	    }
@@ -281,7 +281,7 @@ _cpp_builtin_macro_text (cpp_reader *pfile, cpp_hashnode *node)
       sprintf ((char *) result, "%u", number);
     }
 
-  return result;      
+  return result;
 }
 
 /* Convert builtin macros like __FILE__ to a token and push it on the
@@ -1524,7 +1524,7 @@ _cpp_save_parameter (cpp_reader *pfile, cpp_macro *macro, cpp_hashnode *node)
     }
   ((union _cpp_hashnode_value *) pfile->macro_buffer)[macro->paramc - 1]
     = node->value;
-  
+
   node->value.arg_index  = macro->paramc;
   return false;
 }
@@ -1761,7 +1761,7 @@ create_iso_definition (cpp_reader *pfile, cpp_macro *macro)
 	     function-like macros, but not at the end.  */
 	  if (following_paste_op)
 	    {
-	      cpp_error (pfile, CPP_DL_ERROR, paste_op_error_msg);
+	      cpp_error (pfile, CPP_DL_ERROR, "%s", paste_op_error_msg);
 	      return false;
 	    }
 	  break;
@@ -1774,7 +1774,7 @@ create_iso_definition (cpp_reader *pfile, cpp_macro *macro)
 	     function-like macros, but not at the beginning.  */
 	  if (macro->count == 1)
 	    {
-	      cpp_error (pfile, CPP_DL_ERROR, paste_op_error_msg);
+	      cpp_error (pfile, CPP_DL_ERROR, "%s", paste_op_error_msg);
 	      return false;
 	    }
 

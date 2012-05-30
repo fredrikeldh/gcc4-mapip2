@@ -108,9 +108,9 @@ ssa_undefined_value_p (tree t)
               && pointer_set_contains (possibly_undefined_names, t)));
 }
 
-/* Checks if the operand OPND of PHI is defined by 
-   another phi with one operand defined by this PHI, 
-   but the rest operands are all defined. If yes, 
+/* Checks if the operand OPND of PHI is defined by
+   another phi with one operand defined by this PHI,
+   but the rest operands are all defined. If yes,
    returns true to skip this this operand as being
    redundant. Can be enhanced to be more general.  */
 
@@ -604,7 +604,7 @@ dump_predicates (gimple usestmt, size_t num_preds,
 {
   size_t i, j;
   VEC(use_pred_info_t, heap) *one_pred_chain;
-  fprintf (dump_file, msg);
+  fprintf (dump_file, "%s", msg);
   print_gimple_stmt (dump_file, usestmt, 0, 0);
   fprintf (dump_file, "is guarded by :\n");
   /* do some dumping here:  */
@@ -647,7 +647,7 @@ destroy_predicate_vecs (size_t n,
 }
 
 
-/* Computes the 'normalized' conditional code with operand 
+/* Computes the 'normalized' conditional code with operand
    swapping and condition inversion.  */
 
 static enum tree_code
@@ -1332,7 +1332,7 @@ is_gcond_subset_of (gimple cond1, bool invert1,
   return false;
 }
 
-/* Returns true if the domain of the condition expression 
+/* Returns true if the domain of the condition expression
    in COND is a subset of any of the sub-conditions
    of the normalized condtion NORM_COND.  INVERT is a flag
    to indicate of the COND needs to be inverted.
@@ -1401,8 +1401,8 @@ is_and_set_subset_of (norm_cond_t norm_cond1,
   return true;
 }
 
-/* Returns true of the domain if NORM_COND1 is a subset 
-   of that of NORM_COND2. Returns false if it can not be 
+/* Returns true of the domain if NORM_COND1 is a subset
+   of that of NORM_COND2. Returns false if it can not be
    proved to be so.  */
 
 static bool
@@ -1716,7 +1716,7 @@ find_uninit_use (gimple phi, unsigned uninit_opnds,
 	use_bb = gimple_bb (use_stmt);
 
       if (is_use_properly_guarded (use_stmt,
-                                   use_bb, 
+                                   use_bb,
                                    phi,
                                    uninit_opnds,
                                    visited_phis))

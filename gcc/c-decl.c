@@ -4101,7 +4101,7 @@ start_decl (struct c_declarator *declarator, struct c_declspecs *declspecs,
     record_inline_static (input_location, current_function_decl,
 			  decl, csi_modifiable);
 
-  if (c_dialect_objc () 
+  if (c_dialect_objc ()
       && (TREE_CODE (decl) == VAR_DECL
           || TREE_CODE (decl) == FUNCTION_DECL))
       objc_check_global_decl (decl);
@@ -5560,7 +5560,7 @@ grokdeclarator (const struct c_declarator *declarator,
 	    errmsg = targetm.invalid_return_type (type);
 	    if (errmsg)
 	      {
-		error (errmsg);
+		error ("%s", errmsg);
 		type = integer_type_node;
 	      }
 
@@ -6225,7 +6225,7 @@ grokparms (struct c_arg_info *arg_info, bool funcdef_flag)
 	  errmsg = targetm.invalid_parameter_type (type);
 	  if (errmsg)
 	    {
-	      error (errmsg);
+	      error ("%s", errmsg);
 	      TREE_VALUE (typelt) = error_mark_node;
 	      TREE_TYPE (parm) = error_mark_node;
 	      arg_types = NULL_TREE;
@@ -8218,7 +8218,7 @@ void
 finish_function (void)
 {
   tree fndecl = current_function_decl;
-  
+
   if (c_dialect_objc ())
     objc_finish_function ();
 
@@ -9812,7 +9812,7 @@ for_each_global_decl (void (*callback) (tree decl))
   unsigned i;
 
   FOR_EACH_VEC_ELT (tree, all_translation_units, i, t)
-    { 
+    {
       decls = DECL_INITIAL (t);
       for (decl = BLOCK_VARS (decls); decl; decl = TREE_CHAIN (decl))
 	callback (decl);

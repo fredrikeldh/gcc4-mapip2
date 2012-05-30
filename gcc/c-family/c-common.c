@@ -569,14 +569,14 @@ const struct c_common_resword c_common_reswords[] =
   { "oneway",		RID_ONEWAY,		D_OBJC },
   { "out",		RID_OUT,		D_OBJC },
   /* These are recognized inside a property attribute list */
-  { "assign",	        RID_ASSIGN,		D_OBJC }, 
-  { "copy",	        RID_COPY,		D_OBJC }, 
-  { "getter",		RID_GETTER,		D_OBJC }, 
-  { "nonatomic",	RID_NONATOMIC,		D_OBJC }, 
-  { "readonly",		RID_READONLY,		D_OBJC }, 
-  { "readwrite",	RID_READWRITE,		D_OBJC }, 
-  { "retain",	        RID_RETAIN,		D_OBJC }, 
-  { "setter",		RID_SETTER,		D_OBJC }, 
+  { "assign",	        RID_ASSIGN,		D_OBJC },
+  { "copy",	        RID_COPY,		D_OBJC },
+  { "getter",		RID_GETTER,		D_OBJC },
+  { "nonatomic",	RID_NONATOMIC,		D_OBJC },
+  { "readonly",		RID_READONLY,		D_OBJC },
+  { "readwrite",	RID_READWRITE,		D_OBJC },
+  { "retain",	        RID_RETAIN,		D_OBJC },
+  { "setter",		RID_SETTER,		D_OBJC },
 };
 
 const unsigned int num_c_common_reswords =
@@ -6742,13 +6742,13 @@ handle_alias_ifunc_attribute (bool is_alias, tree *node, tree name, tree args,
       return NULL_TREE;
     }
   else if (!is_alias
-	   && (lookup_attribute ("weak", DECL_ATTRIBUTES (decl)) 
+	   && (lookup_attribute ("weak", DECL_ATTRIBUTES (decl))
 	       || lookup_attribute ("weakref", DECL_ATTRIBUTES (decl))))
     {
       error ("weak %q+D cannot be defined %qE", decl, name);
       *no_add_attrs = true;
       return NULL_TREE;
-    }			 
+    }
 
   /* Note that the very first time we process a nested declaration,
      decl_function_context will not be set.  Indeed, *would* never
@@ -8314,11 +8314,11 @@ c_parse_error (const char *gmsgid, enum cpp_ttype token_type,
       message = NULL;
     }
   else
-    error (gmsgid);
+    error ("%s", gmsgid);
 
   if (message)
     {
-      error (message);
+      error ("%s", message);
       free (message);
     }
 #undef catenate_messages
@@ -8577,17 +8577,17 @@ fold_offsetof (tree expr)
   return convert (size_type_node, fold_offsetof_1 (expr));
 }
 
-/* Warn for A ?: C expressions (with B omitted) where A is a boolean 
+/* Warn for A ?: C expressions (with B omitted) where A is a boolean
    expression, because B will always be true. */
 
 void
-warn_for_omitted_condop (location_t location, tree cond) 
-{ 
-  if (truth_value_p (TREE_CODE (cond))) 
-      warning_at (location, OPT_Wparentheses, 
+warn_for_omitted_condop (location_t location, tree cond)
+{
+  if (truth_value_p (TREE_CODE (cond)))
+      warning_at (location, OPT_Wparentheses,
 		"the omitted middle operand in ?: will always be %<true%>, "
 		"suggest explicit middle operand");
-} 
+}
 
 /* Give an error for storing into ARG, which is 'const'.  USE indicates
    how ARG was being used.  */
@@ -8633,7 +8633,7 @@ readonly_error (tree arg, enum lvalue_use use)
 			 G_("increment of read-only parameter %qD"),
 			 G_("decrement of read-only parameter %qD"),
 			 G_("read-only parameter %qD use as %<asm%> output")),
-	   arg);  
+	   arg);
   else if (TREE_CODE (arg) == RESULT_DECL)
     {
       gcc_assert (c_dialect_cxx ());
@@ -8861,9 +8861,9 @@ complete_array_type (tree *ptype, tree initial_value, bool do_default)
 }
 
 /* Like c_mark_addressable but don't check register qualifier.  */
-void 
+void
 c_common_mark_addressable_vec (tree t)
-{   
+{
   while (handled_component_p (t))
     t = TREE_OPERAND (t, 0);
   if (TREE_CODE (t) != VAR_DECL && TREE_CODE (t) != PARM_DECL)

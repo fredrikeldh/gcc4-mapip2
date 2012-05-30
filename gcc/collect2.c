@@ -174,7 +174,7 @@ struct head
   int number;
 };
 
-bool vflag;				/* true if -v or --version */ 
+bool vflag;				/* true if -v or --version */
 static int rflag;			/* true if -r */
 static int strip_flag;			/* true if -s */
 static const char *demangle_flag;
@@ -2086,10 +2086,10 @@ collect_execute (const char *prog, char **argv, const char *outname,
       if (err != 0)
 	{
 	  errno = err;
-	  fatal_perror (errmsg);
+	  fatal_perror ("%s", errmsg);
 	}
       else
-	fatal (errmsg);
+	fatal ("%s", errmsg);
     }
 
   if (response_arg)
@@ -2627,10 +2627,10 @@ scan_prog_file (const char *prog_name, scanpass which_pass,
       if (err != 0)
 	{
 	  errno = err;
-	  fatal_perror (errmsg);
+	  fatal_perror ("%s", errmsg);
 	}
       else
-	fatal (errmsg);
+	fatal ("%s", errmsg);
     }
 
   int_handler  = (void (*) (int)) signal (SIGINT,  SIG_IGN);
@@ -3274,7 +3274,7 @@ static void
 post_ld_pass (bool temp_file) {
   if (!(temp_file && flag_idsym) && !flag_dsym)
     return;
-      
+
   do_dsymutil (output_file);
 }
 #else

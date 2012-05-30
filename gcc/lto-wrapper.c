@@ -181,10 +181,10 @@ collect_execute (char **argv)
       if (err != 0)
 	{
 	  errno = err;
-	  fatal_perror (errmsg);
+	  fatal_perror ("%s", errmsg);
 	}
       else
-	fatal (errmsg);
+	fatal ("%s", errmsg);
     }
 
   return pex;
@@ -426,7 +426,7 @@ run_gcc (unsigned argc, char *argv[])
       argv_ptr[1] = "-o";
       argv_ptr[2] = flto_out;
     }
-  else 
+  else
     {
       const char *list_option = "-fltrans-output-list=";
       size_t list_option_len = strlen (list_option);
@@ -582,7 +582,7 @@ cont:
 	  fclose (mstream);
 	  if (!jobserver)
 	    {
-	      /* Avoid passing --jobserver-fd= and similar flags 
+	      /* Avoid passing --jobserver-fd= and similar flags
 		 unless jobserver mode is explicitly enabled.  */
 	      putenv (xstrdup ("MAKEFLAGS="));
 	      putenv (xstrdup ("MFLAGS="));

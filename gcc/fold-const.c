@@ -196,7 +196,7 @@ div_if_zero_remainder (enum tree_code code, const_tree arg1, const_tree arg2)
   if (double_int_zero_p (rem))
     return build_int_cst_wide (TREE_TYPE (arg1), quo.low, quo.high);
 
-  return NULL_TREE; 
+  return NULL_TREE;
 }
 
 /* This is nonzero if we should defer warnings about undefined
@@ -314,7 +314,7 @@ fold_overflow_warning (const char* gmsgid, enum warn_strict_overflow_code wc)
 	}
     }
   else if (issue_strict_overflow_warning (wc))
-    warning (OPT_Wstrict_overflow, gmsgid);
+    warning (OPT_Wstrict_overflow, "%s", gmsgid);
 }
 
 /* Return true if the built-in mathematical function specified by CODE
@@ -2401,7 +2401,7 @@ operand_equal_p (const_tree arg0, const_tree arg1, unsigned int flags)
       || TREE_TYPE (arg1) == error_mark_node)
     return 0;
 
-  /* Similar, if either does not have a type (like a released SSA name), 
+  /* Similar, if either does not have a type (like a released SSA name),
      they aren't equal.  */
   if (!TREE_TYPE (arg0) || !TREE_TYPE (arg1))
     return 0;
@@ -4954,7 +4954,7 @@ unextend (tree c, int p, int unsignedp, tree mask)
      A || ~B
    or
      A && ~B
-   LOC is the location of the resulting expression.  OP is the inner 
+   LOC is the location of the resulting expression.  OP is the inner
    logical operation; the left-hand side in the examples above, while CMPOP
    is the right-hand side.  RHS_ONLY is used to prevent us from accidentally
    removing a condition that guards another, as in
@@ -11537,7 +11537,7 @@ fold_binary_loc (location_t loc,
 	}
 
       /* Fall thru */
-      
+
     case FLOOR_DIV_EXPR:
       /* Simplify A / (B << N) where A and B are positive and B is
 	 a power of 2, to A >> (N + log2(B)).  */
@@ -15339,7 +15339,7 @@ fold_abs_const (tree arg0, tree type)
 static tree
 fold_not_const (const_tree arg0, tree type)
 {
-  double_int val;  
+  double_int val;
 
   gcc_assert (TREE_CODE (arg0) == INTEGER_CST);
 

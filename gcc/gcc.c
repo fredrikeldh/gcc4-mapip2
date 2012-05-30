@@ -2630,7 +2630,7 @@ execute (void)
       if (errmsg != NULL)
 	{
 	  if (err == 0)
-	    fatal_error (errmsg);
+	    fatal_error ("%s", errmsg);
 	  else
 	    {
 	      errno = err;
@@ -3775,7 +3775,7 @@ process_command (unsigned int decoded_options_count,
 	    }
 	  else
 	    fname = xstrdup (arg);
- 
+
           if (strcmp (fname, "-") != 0 && access (fname, F_OK) < 0)
 	    perror_with_name (fname);
           else

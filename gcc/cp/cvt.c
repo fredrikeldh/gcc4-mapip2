@@ -596,7 +596,7 @@ cp_convert_and_check (tree type, tree expr)
 
   if (TREE_TYPE (expr) == type)
     return expr;
-  
+
   result = cp_convert (type, expr);
 
   if (c_inhibit_evaluation_warnings == 0
@@ -628,7 +628,7 @@ ocp_convert (tree type, tree expr, int convtype, int flags)
   if ((invalid_conv_diag
        = targetm.invalid_conversion (TREE_TYPE (expr), type)))
     {
-      error (invalid_conv_diag);
+      error ("%s", invalid_conv_diag);
       return error_mark_node;
     }
 
@@ -711,7 +711,7 @@ ocp_convert (tree type, tree expr, int convtype, int flags)
 	     unspecified.  */
 	  if (TREE_CODE (expr) == INTEGER_CST
 	      && !int_fits_type_p (expr, ENUM_UNDERLYING_TYPE (type)))
-	    warning (OPT_Wconversion, 
+	    warning (OPT_Wconversion,
 		     "the result of the conversion is unspecified because "
 		     "%qE is outside the range of type %qT",
 		     expr, type);

@@ -429,14 +429,14 @@ cpp_classify_number (cpp_reader *pfile, const cpp_token *token)
       if ((result & CPP_N_WIDTH) == CPP_N_LARGE
 	  && CPP_OPTION (pfile, cpp_warn_long_long))
         {
-          const char *message = CPP_OPTION (pfile, cplusplus) 
+          const char *message = CPP_OPTION (pfile, cplusplus)
 		                ? N_("use of C++0x long long integer constant")
 		                : N_("use of C99 long long integer constant");
 
 	  if (CPP_OPTION (pfile, c99))
-            cpp_warning (pfile, CPP_W_LONG_LONG, message);
+            cpp_warning (pfile, CPP_W_LONG_LONG, "%s", message);
           else
-            cpp_pedwarning (pfile, CPP_W_LONG_LONG, message);
+            cpp_pedwarning (pfile, CPP_W_LONG_LONG, "%s", message);
         }
 
       result |= CPP_N_INTEGER;
@@ -1175,7 +1175,7 @@ reduce (cpp_reader *pfile, struct op *top, enum cpp_ttype op)
 	case CPP_OPEN_PAREN:
 	  if (op != CPP_CLOSE_PAREN)
 	    {
-	      cpp_error_with_line (pfile, CPP_DL_ERROR, 
+	      cpp_error_with_line (pfile, CPP_DL_ERROR,
 				   top->token->src_loc,
 				   0, "missing ')' in expression");
 	      return 0;
