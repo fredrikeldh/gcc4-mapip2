@@ -611,7 +611,7 @@ egrep_test (char* pz_data, tTestDesc* p_test)
 
 static int
 quoted_file_exists (const char* pz_src_path,
-                    const char* pz_file_path, 
+                    const char* pz_file_path,
                     const char* pz_file)
 {
   char z[ MAXPATHLEN ];
@@ -660,7 +660,7 @@ quoted_file_exists (const char* pz_src_path,
 
 
 static void
-extract_quoted_files (char* pz_data, 
+extract_quoted_files (char* pz_data,
                       const char* pz_fixed_file,
                       regmatch_t* p_re_match)
 {
@@ -829,7 +829,7 @@ fix_with_system (tFixDesc* p_fixd,
       /*
        *  Now add the fix number and file names that may be needed
        */
-      sprintf (pz_scan, " %ld '%s' '%s'",  (long) (p_fixd - fixDescList),
+      sprintf (pz_scan, " %ld '%s' '%s' '%s'",  (long) (p_fixd - fixDescList),
 	       pz_fix_file, pz_file_source, pz_temp_file);
     }
   else /* NOT an "internal" fix: */
@@ -859,7 +859,7 @@ fix_with_system (tFixDesc* p_fixd,
       argsize = sizeof( z_cmd_fmt ) + strlen( pz_temp_file )
               + strlen( pz_file_source );
       parg_size = argsize;
-      
+
 
       /*
        *  Compute the size of the command line.  Add lotsa extra space

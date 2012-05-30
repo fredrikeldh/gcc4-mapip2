@@ -1,0 +1,56 @@
+# -*- makefile -*-
+# GCC makefile fragment for MeP
+# Copyright (C) 2001, 2002, 2003, 2005, 2007, 2009, 2010
+# Free Software Foundation, Inc.
+# Contributed by Red Hat Inc
+#
+# This file is part of GCC.
+#
+# GCC is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3, or (at your option)
+# any later version.
+#
+# GCC is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+# License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GCC; see the file COPYING3.  If not see
+# <http://www.gnu.org/licenses/>.  */
+
+# Force genpreds to be rebuilt in case MeP-Integrator changed the predicates
+
+# $(srcdir)/config/mapip2/mapip2-intrin.h
+
+GTM_H = tm.h $(tm_file_list) insn-constants.h
+
+# Use -O0 instead of -O2 so we don't get complex relocations
+
+CRTSTUFF_CFLAGS = -O0 $(GCC_CFLAGS) $(INCLUDES) $(MULTILIB_CFLAGS) -g0 \
+  -finhibit-size-directive -fno-inline-functions -fno-exceptions \
+  -fno-zero-initialized-in-bss -fno-unit-at-a-time
+
+TCFLAGS = -mlibrary
+
+EXTRA_MULTILIB_PARTS = crtbegin.o crtend.o
+
+#MD_INCLUDES = \
+#	$(srcdir)/config/mapip2/intrinsics.md \
+#	$(srcdir)/config/mapip2/constraints.md
+
+#mapip2.o : $(srcdir)/config/mapip2/mapip2-intrin.h
+
+# To use this, you must have cgen and cgen/cpu in the same source tree as
+# gcc.
+cgen-maint :
+	S=`cd $(srcdir); pwd`; \
+	cd $$S/config/mapip2 && \
+	guile -s $$S/../cgen/cgen-intrinsics.scm \
+		-s $$S/../cgen \
+		$(CGENFLAGS) \
+		-a $$S/../cgen/cpu/mapip2.cpu \
+		-M intrinsics.md \
+		-N mapip2-intrin.h \
+		-P intrinsics.h

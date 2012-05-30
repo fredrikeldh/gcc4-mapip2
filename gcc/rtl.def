@@ -332,7 +332,7 @@ DEF_RTL_EXPR(CONST_STRING, "const_string", "s", RTX_OBJ)
 /* This is used to encapsulate an expression whose value is constant
    (such as the sum of a SYMBOL_REF and a CONST_INT) so that it will be
    recognized as a constant operand rather than by arithmetic instructions.  */
-
+#undef CONST
 DEF_RTL_EXPR(CONST, "const", "e", RTX_CONST_OBJ)
 
 /* program counter.  Ordinary jumps are represented
@@ -454,6 +454,7 @@ DEF_RTL_EXPR(UDIV, "udiv", "ee", RTX_BIN_ARITH)
 DEF_RTL_EXPR(UMOD, "umod", "ee", RTX_BIN_ARITH)
 
 /* Bitwise operations.  */
+#undef AND
 DEF_RTL_EXPR(AND, "and", "ee", RTX_COMM_ARITH)
 DEF_RTL_EXPR(IOR, "ior", "ee", RTX_COMM_ARITH)
 DEF_RTL_EXPR(XOR, "xor", "ee", RTX_COMM_ARITH)

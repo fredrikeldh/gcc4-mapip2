@@ -63,7 +63,7 @@ extern int errno;
 
 #define __environ	environ
 #ifndef HAVE_ENVIRON_DECL
-extern char **environ;
+/*extern char **environ;*/
 #endif
 
 #undef setenv

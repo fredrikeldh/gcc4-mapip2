@@ -226,6 +226,7 @@ output_prologue (void)
   printf ("#include \"config.h\"\n");
   printf ("#include \"system.h\"\n");
   printf ("#include \"coretypes.h\"\n");
+  printf ("#include \"insn-flags.h\"\n");
   printf ("#include \"tm.h\"\n");
   printf ("#include \"flags.h\"\n");
   printf ("#include \"ggc.h\"\n");

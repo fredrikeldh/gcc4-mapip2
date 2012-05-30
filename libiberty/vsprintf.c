@@ -33,6 +33,8 @@ the executable file might be covered by the GNU General Public License. */
 
 #if defined _IOSTRG && defined _IOWRT
 
+int _doprnt (const char *format, va_list ap, FILE *stream);
+
 int
 vsprintf (char *buf, const char *format, va_list ap)
 {

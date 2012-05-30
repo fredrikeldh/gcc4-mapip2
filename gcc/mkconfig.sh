@@ -15,7 +15,7 @@
 
 # You should have received a copy of the GNU General Public License
 # along with GCC; see the file COPYING3.  If not see
-# <http://www.gnu.org/licenses/>.  
+# <http://www.gnu.org/licenses/>.
 
 
 # Generate gcc's various configuration headers:
@@ -28,6 +28,8 @@ if [ -z "$1" ]; then
     echo "  [TARGET_CPU_DEFAULT='default'] mkconfig.sh FILE" >&2
     exit 1
 fi
+
+set -x
 
 output=$1
 rm -f ${output}T
@@ -57,7 +59,7 @@ fi
 # Provide defines for other macros set in config.gcc for this file.
 for def in $DEFINES; do
     echo "#ifndef $def" | sed 's/=.*//' >> ${output}T
-    echo "# define $def" | sed 's/=/ /' >> ${output}T
+    echo "# define $def" | sed 's/[=]/ /' >> ${output}T
     echo "#endif" >> ${output}T
 done
 

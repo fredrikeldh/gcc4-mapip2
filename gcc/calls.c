@@ -251,7 +251,7 @@ emit_call_1 (rtx funexp, tree fntree ATTRIBUTE_UNUSED, tree fndecl ATTRIBUTE_UNU
 	     HOST_WIDE_INT stack_size ATTRIBUTE_UNUSED,
 	     HOST_WIDE_INT rounded_stack_size,
 	     HOST_WIDE_INT struct_value_size ATTRIBUTE_UNUSED,
-	     rtx next_arg_reg ATTRIBUTE_UNUSED, rtx valreg,
+	     rtx next_arg_reg ATTRIBUTE_UNUSED, rtx valreg ATTRIBUTE_UNUSED,
 	     int old_inhibit_defer_pop, rtx call_fusage, int ecf_flags,
 	     CUMULATIVE_ARGS *args_so_far ATTRIBUTE_UNUSED)
 {
@@ -1816,7 +1816,7 @@ load_register_parameters (struct arg_data *args, int num_actuals,
 	         providing that this has non-zero size.  */
 	      if (is_sibcall
 		  && (size == 0
-		      || mem_overlaps_already_clobbered_arg_p 
+		      || mem_overlaps_already_clobbered_arg_p
 					   (XEXP (args[i].value, 0), size)))
 		*sibcall_failure = 1;
 

@@ -1813,6 +1813,11 @@ m68k-*-rtems*)
 	tm_defines="${tm_defines} MOTOROLA=1"
 	extra_parts="crtbegin.o crtend.o"
 	;;
+mapip2-*)
+	tm_file="${tm_file} mapip2/mapip2.h"
+	tmake_file=mapip2/t-mapip2
+	inhibit_libc=true
+	;;
 mcore-*-elf)
 	tm_file="dbxelf.h elfos.h newlib-stdint.h ${tm_file} mcore/mcore-elf.h"
 	tmake_file=mcore/t-mcore

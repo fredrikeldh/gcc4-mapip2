@@ -72,7 +72,7 @@ LIBOBJS = @LIBOBJS@
 
 # A configuration can specify extra .o files that should be included,
 # even if they are in libc. (Perhaps the libc version is buggy.)
-EXTRA_OFILES = 
+EXTRA_OFILES =
 
 # Flags to pass to a recursive make.
 FLAGS_TO_PASS = \
@@ -496,7 +496,7 @@ $(CONFIGURED_OFILES): stamp-picdir
 	if [ x"$(PICFLAG)" != x ]; then \
 	  $(COMPILE.c) $(PICFLAG) $(srcdir)/_doprnt.c -o pic/$@; \
 	else true; fi
-	$(COMPILE.c) $(srcdir)/_doprnt.c $(OUTPUT_OPTION)
+	$(COMPILE.c) -std=c99 $(srcdir)/_doprnt.c $(OUTPUT_OPTION)
 
 ./alloca.$(objext): $(srcdir)/alloca.c config.h $(INCDIR)/ansidecl.h \
 	$(INCDIR)/libiberty.h
