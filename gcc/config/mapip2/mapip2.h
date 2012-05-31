@@ -10,7 +10,9 @@
 #define TARGET_CPU_CPP_BUILTINS() \
 do \
 	{ \
+		builtin_define ("MAPIP");	 \
 		builtin_define_std ("mapip2"); \
+		builtin_assert ("cpu=mapip2"); \
 		builtin_assert ("machine=mapip2"); \
 	} \
 while (0)
@@ -82,6 +84,13 @@ enum reg_class
 #define WORDS_BIG_ENDIAN 0
 #define FUNCTION_BOUNDARY 8
 #define STACK_SAVEAREA_MODE(LEVEL) Pmode
+#define PROMOTE_MODE(MODE, UNSIGNEDP, TYPE)	 \
+do { \
+	if (GET_MODE_CLASS (MODE) == MODE_INT \
+		&& GET_MODE_SIZE (MODE) < 4) \
+		(MODE) = SImode; \
+} while (0)
+
 
 /* type layout */
 #define DEFAULT_SIGNED_CHAR 0
@@ -126,6 +135,8 @@ typedef int CUMULATIVE_ARGS;
 /* frame layout */
 #define STARTING_FRAME_OFFSET 0
 #define FIRST_PARM_OFFSET(fundecl) 0
+#define INCOMING_RETURN_ADDR_RTX gen_rtx_REG(SImode, RA_REGNUM)
+#define DWARF_FRAME_RETURN_COLUMN RA_REGNUM
 
 /* label output */
 void ASM_GENERATE_INTERNAL_LABEL PARAMS ((char* buf, const char*  prefix, int num));
@@ -173,8 +184,17 @@ void ASM_OUTPUT_LOCAL PARAMS ((FILE* stream, const char* name, int size, int rou
 #define PREFERRED_DEBUGGING_TYPE DWARF2_DEBUG
 #define DWARF2_ASM_LINE_DEBUG_INFO 1
 
+/* sections */
+#define TEXT_SECTION_ASM_OP ".text"
+#define DATA_SECTION_ASM_OP	".data"
+#define READONLY_DATA_SECTION_ASM_OP ".rodata"
+#define BSS_SECTION_ASM_OP	".bss"
+
 
 #define GCC_INSN_FLAGS_H	/* enable all default values */
 #include "defaults.h"
+
+
+void mapip2_expand_call (rtx* operands, int returns_value);
 
 #endif	/*MAPIP2_H*/

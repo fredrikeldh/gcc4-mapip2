@@ -25,9 +25,20 @@
 #include "output.h"
 #include "tm_p.h"
 #include "ggc.h"
+#include "errors.h"
 
 #include "target.h"
 #include "target-def.h"
+
+static void print_mem_expr_old (FILE *file, rtx op);
+
+static void
+abort_with_insn (rtx insn, const char * reason)
+{
+	error ("%s", reason);
+	debug_rtx (insn);
+	fancy_abort (__FILE__, __LINE__, __FUNCTION__);
+}
 
 /***********************************
 *  Test if a reg can be used as a
@@ -97,6 +108,237 @@ static bool TARGET_LEGITIMATE_ADDRESS_P(enum machine_mode mode ATTRIBUTE_UNUSED,
   return valid;
 }
 
+#undef TARGET_FUNCTION_VALUE
+static rtx TARGET_FUNCTION_VALUE (const_tree type,
+	const_tree fn_decl_or_type ATTRIBUTE_UNUSED, bool outgoing ATTRIBUTE_UNUSED)
+{
+  return gen_rtx_REG(TYPE_MODE(type), R0_REGNUM);
+}
+
+#undef TARGET_FUNCTION_ARG_ADVANCE
+static void TARGET_FUNCTION_ARG_ADVANCE (CUMULATIVE_ARGS *ca ATTRIBUTE_UNUSED,
+	enum machine_mode mode ATTRIBUTE_UNUSED,
+	const_tree type ATTRIBUTE_UNUSED,
+	bool named ATTRIBUTE_UNUSED)
+{
+}
+
+static const int MAX_ARGS_IN_REGS = 4;
+
+#undef TARGET_FUNCTION_ARG
+static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
+	enum machine_mode mode,
+	const_tree type ATTRIBUTE_UNUSED,
+	bool named ATTRIBUTE_UNUSED)
+{
+	rtx x;
+	int words;
+
+	words = *ca;
+
+	if (words > MAX_ARGS_IN_REGS || named == 0)
+		return 0;
+
+	if (type)
+		PROMOTE_MODE (mode, 0, type);
+
+	switch (mode)
+	{
+	default:
+	case BLKmode:
+		words += ((int_size_in_bytes (type) + UNITS_PER_WORD - 1) / UNITS_PER_WORD);
+		break;
+
+	case DFmode:
+	case DImode:
+		words += 2;
+		break;
+
+	case VOIDmode:
+	case SFmode:
+	case QImode:
+	case HImode:
+	case SImode:
+		words++;
+		break;
+	}
+
+	if (words > MAX_ARGS_IN_REGS)
+		return 0;
+
+	x = gen_rtx_REG (mode, P0_REGNUM + *ca);
+
+	if (x == 0)
+		abort ();
+
+	return x;
+}
+
+#undef TARGET_LIBCALL_VALUE
+static rtx TARGET_LIBCALL_VALUE (enum machine_mode mode, const_rtx fun ATTRIBUTE_UNUSED)
+{
+	return gen_rtx_REG (mode, R0_REGNUM);
+}
+
+#undef TARGET_PRINT_OPERAND
+/*
+* warning: definition seems to have changed since 3.6.4. function may misbehave.
+*/
+static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
+{
+	enum rtx_code code;
+
+	if (!x)
+	{
+		error("PRINT_OPERAND null pointer");
+		return;
+	}
+
+	code = GET_CODE (x);
+
+	if (code == SIGN_EXTEND)
+		x = XEXP (x, 0), code = GET_CODE (x);
+
+	if (letter == 'C' || letter == 'N')
+	{
+		switch (code)
+		{
+		case EQ: fputs ("eq", file); return;
+		case NE: fputs ("ne", file); return;
+		case GT: fputs ("gt", file); return;
+		case GE: fputs ("ge", file); return;
+		case LT: fputs ("lt", file); return;
+		case LE: fputs ("le", file); return;
+		case GTU: fputs ("gtu", file); return;
+		case GEU: fputs ("geu", file); return;
+		case LTU: fputs ("ltu", file); return;
+		case LEU: fputs ("leu", file); return;
+		default: abort_with_insn (x, "PRINT_OPERAND, invalid insn for %%C");
+		}
+
+		return;
+	}
+
+	if (code == REG)
+	{
+		int regno = REGNO(x);
+
+		if (letter == 'D')					/* High part of double */
+			regno++;
+
+		fprintf (file, "%s", reg_names[regno]);
+		return;
+	}
+
+	if (code == MEM)
+	{
+		output_address (XEXP (x, 0));
+		return;
+	}
+
+	if (code == CONST_INT || code == CONST_DOUBLE)
+	{
+	/* !! Added ARH 20-04-08 Fixed problem with immediate floats */
+
+		if (GET_MODE(x) == SFmode)
+		{
+			REAL_VALUE_TYPE d;
+			long l;
+
+			fprintf (file, "#");
+			REAL_VALUE_FROM_CONST_DOUBLE (d, x);
+			REAL_VALUE_TO_TARGET_SINGLE (d, l);
+			fprintf (file, HOST_WIDE_INT_PRINT_HEX, l);
+			fprintf(file, "\t\t; %.12g", *(double*)&d);
+			return;
+		}
+
+	/* !! End */
+
+		fprintf (file, "#");
+		fprintf (file, HOST_WIDE_INT_PRINT_HEX, INTVAL (x));
+		return;
+	}
+
+	fprintf (file, "#");
+	output_addr_const (file, x);
+}
+
+
+#undef TARGET_PRINT_OPERAND_ADDRESS
+static void TARGET_PRINT_OPERAND_ADDRESS(FILE *file, rtx addr)
+{
+	if (!addr)
+	{
+		error ("PRINT_OPERAND_ADDRESS, null pointer");
+		return;
+	}
+
+	switch (GET_CODE (addr))
+	{
+	case REG:
+		fputs (reg_names[REGNO (addr)], file);
+		break;
+
+	case PLUS:
+	{
+		rtx reg    = (rtx)0;
+		rtx offset = (rtx)0;
+		rtx arg0   = XEXP (addr, 0);
+		rtx arg1   = XEXP (addr, 1);
+
+		if (GET_CODE (arg0) == REG)
+		{
+			reg = arg0;
+			offset = arg1;
+			if (GET_CODE (offset) == REG)
+				abort_with_insn (addr, "PRINT_OPERAND_ADDRESS, 2 regs");
+		}
+		else if (GET_CODE (arg1) == REG)
+		{
+			reg = arg1;
+			offset = arg0;
+		}
+		else if (CONSTANT_P (arg0) && CONSTANT_P (arg1))
+		{
+			output_addr_const (file, addr);
+			break;
+		}
+		else if (GET_CODE (arg0) == MEM)
+		{
+			print_mem_expr_old (file, arg0);
+			offset = arg1;
+		}
+		else
+			abort_with_insn (addr, "PRINT_OPERAND_ADDRESS, no regs");
+
+		if (reg)
+			fprintf (file, "%s,", reg_names[REGNO (reg)]);
+
+		if (offset)
+		{
+			if (!CONSTANT_P (offset))
+				abort_with_insn (addr, "PRINT_OPERAND_ADDRESS, invalid insn #2");
+			output_addr_const (file, offset);
+		}
+	}
+	break;
+
+	case LABEL_REF:
+	case SYMBOL_REF:
+	case CONST_INT:
+	case CONST:
+		fprintf (file, "&");
+		output_addr_const (file, addr);
+		break;
+
+	default:
+		abort_with_insn (addr, "PRINT_OPERAND_ADDRESS, invalid insn #1");
+	}
+}
+
+
+
 /* Initialize the GCC target structure.  */
 
 struct gcc_target targetm = TARGET_INITIALIZER;
@@ -149,4 +391,26 @@ void default_globalize_label(FILE* stream, const char* name)
 	fputs(".global\t", stream);
 	assemble_name(stream, name);
 	putc('\n', stream);
+}
+
+static void print_mem_expr_old (FILE *file, rtx op)
+{
+	rtx arg0;
+	arg0 = XEXP (op, 0);
+	switch (GET_CODE (arg0))
+	{
+	case PLUS:
+		TARGET_PRINT_OPERAND_ADDRESS (file, arg0);
+		fprintf (file, "+");
+		break;
+	case REG:
+		TARGET_PRINT_OPERAND_ADDRESS (file, arg0);
+		fputc (',', file);
+		break;
+	case MEM:
+		print_mem_expr_old (file, arg0);
+		break;
+	default:
+		TARGET_PRINT_OPERAND (file, op, 0);
+	}
 }

@@ -1,3 +1,11 @@
+(define_predicate "call_operand"
+  (match_code "mem")
+{
+  return (GET_CODE (op) == MEM
+	  && (GET_CODE (XEXP (op, 0)) == SYMBOL_REF
+			|| GET_CODE (XEXP (op, 0)) == REG));
+})
+
 (define_constants
 	[(ZERO_REGNUM 0)
 	(SP_REGNUM		1)
@@ -43,6 +51,18 @@
 	""
 	"ld %0,%1")
 
+(define_insn "movhi"
+	[(set (match_operand:HI 0 "nonimmediate_operand" "")
+		(match_operand:HI 1 "general_operand" ""))]
+	""
+	"ld.h %0,%1")
+
+(define_insn "movqi"
+	[(set (match_operand:QI 0 "nonimmediate_operand" "")
+		(match_operand:QI 1 "general_operand" ""))]
+	""
+	"ld.b %0,%1")
+
 (define_insn "jump"
   [(set (pc) (label_ref (match_operand 0 "" "")))]
   ""
@@ -67,3 +87,20 @@
 	[(const_int 0)]
 	"1"
 	"")
+
+(define_insn "call"
+  [(call (match_operand 0 "call_operand" "Qm")
+	 (match_operand 1 ""             "g"))
+   (clobber (reg:SI 17))]
+  ""
+  "call %0"
+)
+
+(define_insn "call_value"
+  [(set (match_operand 0 "register_operand"  "=r")
+	(call (match_operand 1 "call_operand" "Qm")
+	      (match_operand 2 ""             "g")))
+   (clobber (reg:SI 17))]
+  ""
+  "call %1"
+)

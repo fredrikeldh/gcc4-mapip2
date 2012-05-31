@@ -3325,6 +3325,9 @@ emit_move_multi_word (enum machine_mode mode, rtx x, rtx y)
   bool need_clobber;
   int i;
 
+	if(GET_MODE_SIZE (mode) < UNITS_PER_WORD) {
+		error("mode %i size %i < UNITS_PER_WORD %i\n", mode, GET_MODE_SIZE (mode), UNITS_PER_WORD);
+	}
   gcc_assert (GET_MODE_SIZE (mode) >= UNITS_PER_WORD);
 
   /* If X is a push on the stack, do the push now and replace
@@ -4343,7 +4346,7 @@ expand_assignment (tree to, tree from, bool nontemporal)
 	  else if (GET_MODE (to_rtx) == VOIDmode)
 	    to_rtx = adjust_address (to_rtx, BLKmode, 0);
 	}
- 
+
       if (offset != 0)
 	{
 	  enum machine_mode address_mode;
@@ -9338,7 +9341,7 @@ expand_expr_real_1 (tree exp, rtx target, enum machine_mode tmode,
 	       2. the bitsize is narrower than the access size. Need
 	       to extract bitfields from the access.  */
 	    || (volatilep && flag_strict_volatile_bitfields > 0
-		&& (bitpos % GET_MODE_ALIGNMENT (mode) != 0 
+		&& (bitpos % GET_MODE_ALIGNMENT (mode) != 0
 		    || (mode1 != BLKmode
 		        && bitsize < GET_MODE_SIZE (mode1) * BITS_PER_UNIT)))
 	    /* If the field isn't aligned enough to fetch as a memref,

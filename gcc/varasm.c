@@ -591,7 +591,7 @@ default_function_section (tree decl, enum node_frequency freq,
 /* Return the section for function DECL.
 
    If DECL is NULL_TREE, return the text section.  We can be passed
-   NULL_TREE under some circumstances by dbxout.c at least. 
+   NULL_TREE under some circumstances by dbxout.c at least.
 
    If FORCE_COLD is true, return cold function section ignoring
    the frequency info of cgraph_node.  */
@@ -1014,7 +1014,7 @@ align_variable (tree decl, bool dont_output_data)
 /* Return the section into which the given VAR_DECL or CONST_DECL
    should be placed.  PREFER_NOSWITCH_P is true if a noswitch
    section should be used wherever possible.  */
-
+#define GVS_RETURN(a) do { section* b = (a); if(!b) { gcc_unreachable(); } else { return b; } } while(0)
 section *
 get_variable_section (tree decl, bool prefer_noswitch_p)
 {
@@ -1032,9 +1032,9 @@ get_variable_section (tree decl, bool prefer_noswitch_p)
       gcc_assert (DECL_SECTION_NAME (decl) == NULL
 		  && ADDR_SPACE_GENERIC_P (as));
       if (DECL_THREAD_LOCAL_P (decl))
-	return tls_comm_section;
+	GVS_RETURN(tls_comm_section);
       else if (TREE_PUBLIC (decl) && bss_initializer_p (decl))
-	return comm_section;
+	GVS_RETURN(comm_section);
     }
 
   if (DECL_INITIAL (decl) == error_mark_node)
@@ -1046,7 +1046,7 @@ get_variable_section (tree decl, bool prefer_noswitch_p)
 
   resolve_unique_section (decl, reloc, flag_data_sections);
   if (IN_NAMED_SECTION (decl))
-    return get_named_section (decl, NULL, reloc);
+    GVS_RETURN(get_named_section (decl, NULL, reloc));
 
   if (ADDR_SPACE_GENERIC_P (as)
       && !DECL_THREAD_LOCAL_P (decl)
@@ -1054,12 +1054,12 @@ get_variable_section (tree decl, bool prefer_noswitch_p)
       && bss_initializer_p (decl))
     {
       if (!TREE_PUBLIC (decl))
-	return lcomm_section;
+	GVS_RETURN(lcomm_section);
       if (bss_noswitch_section)
-	return bss_noswitch_section;
+	GVS_RETURN(bss_noswitch_section);
     }
 
-  return targetm.asm_out.select_section (decl, reloc, DECL_ALIGN (decl));
+  GVS_RETURN(targetm.asm_out.select_section (decl, reloc, DECL_ALIGN (decl)));
 }
 
 /* Return the block into which object_block DECL should be placed.  */
@@ -1933,7 +1933,7 @@ assemble_variable (tree decl, int top_level ATTRIBUTE_UNUSED,
 
   /* Emulated TLS had better not get this far.  */
   gcc_checking_assert (targetm.have_tls || !DECL_THREAD_LOCAL_P (decl));
-              
+
   last_assemble_variable_decl = 0;
 
   /* Normally no need to say anything here for external references,
@@ -2857,7 +2857,7 @@ compare_constant (const tree t1, const tree t2)
 	      return 0;
 	    link2 = TREE_CHAIN (link2);
 	  }
-	
+
 	return 1;
       }
 
@@ -5760,7 +5760,7 @@ finish_aliases_1 (void)
 	       && ! lookup_attribute ("weakref", DECL_ATTRIBUTES (p->decl)))
 	{
 	  error ("%q+D aliased to external symbol %qE",
-		 p->decl, p->target);	  
+		 p->decl, p->target);
 	  p->emitted_diags |= ALIAS_DIAG_TO_EXTERN;
 	}
     }
@@ -5826,7 +5826,7 @@ assemble_alias (tree decl, tree target)
 	  if (lookup_attribute ("ifunc", DECL_ATTRIBUTES (decl)))
 	    error_at (DECL_SOURCE_LOCATION (decl),
 		      "ifunc is not supported in this configuration");
-	  else	
+	  else
 	    error_at (DECL_SOURCE_LOCATION (decl),
 		      "only weak aliases are supported in this configuration");
 	  return;
@@ -5869,7 +5869,7 @@ assemble_alias (tree decl, tree target)
    the visibility type VIS, which must not be VISIBILITY_DEFAULT.  */
 
 void
-default_assemble_visibility (tree decl ATTRIBUTE_UNUSED, 
+default_assemble_visibility (tree decl ATTRIBUTE_UNUSED,
 			     int vis ATTRIBUTE_UNUSED)
 {
 #ifdef HAVE_GAS_HIDDEN
