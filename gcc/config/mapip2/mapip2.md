@@ -84,7 +84,7 @@
 	[(set (pc)
 		(if_then_else (match_operator 0 "ordered_comparison_operator"
 		[(match_operand:SI 1 "register_operand" "")
-			(match_operand:SI 2 "register_operand" "")])
+			(match_operand:SI 2 "general_operand" "g")])
 		(label_ref (match_operand 3 "" ""))
 		(pc)))]
 	""
@@ -96,21 +96,17 @@
 	"")
 
 (define_insn "call"
-  [(call (match_operand:SI 0 "call_operand" "Qm")
-	 (match_operand 1 "" "g"))
-   (clobber (reg:SI 17))]
-  ""
-  "call %0"
-)
+	[(call (match_operand:SI 0 "memory_operand" "m")
+		(match_operand:SI 1 "general_operand" "g"))]
+	""
+	"call %0")
 
 (define_insn "call_value"
-  [(set (match_operand:SI 0 "register_operand"  "=r")
-	(call (match_operand:SI 1 "call_operand" "Qm")
-	      (match_operand 2 "" "g")))
-   (clobber (reg:SI 17))]
+	[(set (match_operand 0 "" "=g")
+		(call (match_operand:SI 1 "memory_operand" "m")
+			(match_operand:SI 2 "general_operand" "g")))]
   ""
-  "call %1"
-)
+  "call %1")
 
 (define_insn "return"
 	[(return)
