@@ -25,7 +25,7 @@
 #include "output.h"
 #include "tm_p.h"
 #include "ggc.h"
-#include "errors.h"
+#include "diagnostic-core.h"
 
 #include "target.h"
 #include "target-def.h"
@@ -335,6 +335,28 @@ static void TARGET_PRINT_OPERAND_ADDRESS(FILE *file, rtx addr)
 	default:
 		abort_with_insn (addr, "PRINT_OPERAND_ADDRESS, invalid insn #1");
 	}
+}
+
+#undef TARGET_ASM_NAMED_SECTION
+static void TARGET_ASM_NAMED_SECTION (const char *name, unsigned int flags, tree decl ATTRIBUTE_UNUSED)
+{
+	fprintf (asm_out_file, ".section %s,0x%x\n",
+		name, flags);
+}
+
+#undef TARGET_ASM_INTEGER
+static bool TARGET_ASM_INTEGER (rtx x, unsigned int size, int aligned_p)
+{
+	/* work around a bug in assemble_integer() */
+	if (size == UNITS_PER_WORD)
+	{
+		fputs (".word ", asm_out_file);
+		output_addr_const (asm_out_file, x);
+		fputs ("\n", asm_out_file);
+		return true;
+	}
+
+	return default_assemble_integer (x, size, aligned_p);
 }
 
 

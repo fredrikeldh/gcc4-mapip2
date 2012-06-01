@@ -66,12 +66,19 @@
 (define_insn "jump"
   [(set (pc) (label_ref (match_operand 0 "" "")))]
   ""
-  "jp %l0")
+  "jp %0")
 
 (define_insn "indirect_jump"
 	[(set (pc) (match_operand:SI 0 "register_operand" "r"))]
 	""
 	"jp %0")
+
+(define_insn "tablejump"
+	[(set (pc)
+		(match_operand:SI 0 "register_operand" "r"))
+		(use (label_ref (match_operand 1 "" "")))]
+	""
+	"jp %0 ;%1")
 
 (define_insn "cbranchsi4"
 	[(set (pc)
@@ -89,18 +96,155 @@
 	"")
 
 (define_insn "call"
-  [(call (match_operand 0 "call_operand" "Qm")
-	 (match_operand 1 ""             "g"))
+  [(call (match_operand:SI 0 "call_operand" "Qm")
+	 (match_operand 1 "" "g"))
    (clobber (reg:SI 17))]
   ""
   "call %0"
 )
 
 (define_insn "call_value"
-  [(set (match_operand 0 "register_operand"  "=r")
-	(call (match_operand 1 "call_operand" "Qm")
-	      (match_operand 2 ""             "g")))
+  [(set (match_operand:SI 0 "register_operand"  "=r")
+	(call (match_operand:SI 1 "call_operand" "Qm")
+	      (match_operand 2 "" "g")))
    (clobber (reg:SI 17))]
   ""
   "call %1"
 )
+
+(define_insn "return"
+	[(return)
+		(clobber (reg:SI RA_REGNUM))]
+	""
+	"ret")
+
+(define_insn "store_regs"
+	[(match_operand:SI 0 "register_operand" "")
+		(match_operand:SI 1 "register_operand" "")
+		(const_int 1)]
+	""
+	"push %0,%1")
+
+(define_insn "restore_regs"
+	[(match_operand:SI 0 "register_operand" "")
+		(match_operand:SI 1 "register_operand" "")
+		(const_int 2)]
+	""
+	"pop %0,%1")
+
+(define_insn "negsi2"
+	[(set (match_operand:SI 0 "register_operand" "=r")
+		(neg:SI (match_operand:SI 1 "register_operand" "r")))]
+	""
+	"neg %0,%1")
+
+
+; todo: whitespace cleanup
+(define_insn "addsi3"
+  [(set (match_operand:SI 0 "register_operand" "=r,r")
+	(plus:SI (match_operand:SI 1 "general_operand" "%0,0")
+		 (match_operand:SI 2 "general_operand" "r,i")))]
+  ""
+  "@
+   add  %0,%2
+   add  %0,%2")
+
+(define_insn "subsi3"
+  [(set (match_operand:SI 0 "register_operand" "=r,r")
+	(minus:SI (match_operand:SI 1 "register_operand" "0,0")
+		  (match_operand:SI 2 "general_operand" "r,i")))]
+  ""
+  "@
+   sub  %0,%2
+   sub  %0,%2")
+
+;; multiply
+(define_insn "mulsi3"
+  [(set (match_operand:SI 0 "register_operand" "=r,r")
+	(mult:SI (match_operand:SI 1 "register_operand" "0,0")
+		 (match_operand:SI 2 "general_operand" "r,i")))]
+  ""
+  "@
+   mul  %0,%2
+   mul  %0,%2")
+
+;; divide (signed)
+(define_insn "divsi3"
+  [(set (match_operand:SI 0 "register_operand" "=r,r")
+	(div:SI (match_operand:SI 1 "register_operand" "0,0")
+		(match_operand:SI 2 "general_operand" "r,i")))]
+  ""
+  "@
+  div  %0,%2
+  div  %0,%2"
+)
+
+;; divide (unsigned)
+(define_insn "udivsi3"
+  [(set (match_operand:SI 0 "register_operand" "=r,r")
+	(udiv:SI (match_operand:SI 1 "register_operand" "0,0")
+		 (match_operand:SI 2 "general_operand" "r,i")))]
+  ""
+  "@
+  divu %0,%2
+  divu %0,%2")
+
+;; and
+(define_insn "andsi3"
+  [(set (match_operand:SI 0 "register_operand" "=r,r")
+	(and:SI (match_operand:SI 1 "register_operand" "%0,0")
+		(match_operand:SI 2 "general_operand" "r,i")))]
+  ""
+  "@
+  and  %0,%2
+  and  %0,%2")
+
+;; or
+(define_insn "iorsi3"
+  [(set (match_operand:SI 0 "register_operand" "=r,r")
+	(ior:SI (match_operand:SI 1 "register_operand" "0,0")
+		(match_operand:SI 2 "nonmemory_operand" "r,i")))]
+  ""
+  "@
+  or   %0,%2
+  or   %0,%2")
+
+;; xor
+(define_insn "xorsi3"
+  [(set (match_operand:SI 0 "register_operand" "=r,r")
+	(xor:SI (match_operand:SI 1 "register_operand" "%0,0")
+		(match_operand:SI 2 "general_operand" "r,i")))]
+  ""
+  "@
+  xor  %0,%2
+  xor  %0,%2")
+
+;; Shift left
+(define_insn "ashlsi3"
+  [(set (match_operand:SI 0 "register_operand" "=r,r")
+	(ashift:SI (match_operand:SI 1 "register_operand" "0,0")
+		   (match_operand:SI 2 "general_operand" "r,i")))]
+  ""
+  "@
+  sll  %0,%2
+  sll  %0,%2")
+
+;; Arithmetic shift right
+(define_insn "ashrsi3"
+  [(set (match_operand:SI 0 "register_operand" "=r,r")
+	(ashiftrt:SI (match_operand:SI 1 "register_operand" "0,0")
+		     (match_operand:SI 2 "general_operand" "r,i")))]
+  ""
+  "@
+  sra  %0,%2
+  sra  %0,%2")
+
+;; Logical shift right
+(define_insn "lshrsi3"
+  [(set (match_operand:SI 0 "register_operand" "=r,r")
+	(lshiftrt:SI (match_operand:SI 1 "register_operand" "0,0")
+		     (match_operand:SI 2 "general_operand" "r,i")))]
+  ""
+  "@
+  srl  %0,%2
+  srl  %0,%2")

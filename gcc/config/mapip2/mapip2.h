@@ -3,6 +3,9 @@
 
 #include "insn-flags.h"
 
+/* undocumented */
+#define HAVE_GAS_HIDDEN
+
 
 /* run-time target */
 #define SWITCHABLE_TARGET 0
