@@ -6603,8 +6603,12 @@ count_reg_usage (rtx x, int *counts, rtx dest, int incr)
   switch (code = GET_CODE (x))
     {
     case REG:
-      if (x != dest)
+      if (x != dest) {
+		if(REGNO (x) > 1000) {
+			fprintf(stderr, "regno %i\n", REGNO(x));
+		}
 	counts[REGNO (x)] += incr;
+      }
       return;
 
     case PC:

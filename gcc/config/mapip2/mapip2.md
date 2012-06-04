@@ -99,6 +99,24 @@
 	""
 	"xb %0,%1")
 
+(define_insn "truncsiqi2"
+	[(set (match_operand:QI 0 "register_operand" "=r")
+		(truncate:QI (match_operand:SI 1 "general_operand" "0")))]
+	""
+	"and %0,#0xff  ; truncate")
+
+(define_insn "truncsihi2"
+	[(set (match_operand:HI 0 "register_operand" "=r")
+		(truncate:HI (match_operand:SI 1 "general_operand" "0")))]
+	""
+	"and %0,#0xffff ; truncate")
+
+(define_insn "trunchiqi2"
+	[(set (match_operand:QI 0 "register_operand" "=r")
+		(truncate:QI (match_operand:HI 1 "general_operand" "0")))]
+	""
+	"and %0,#0xff  ; truncate")
+
 
 (define_insn "jump"
   [(set (pc) (label_ref (match_operand 0 "" "")))]

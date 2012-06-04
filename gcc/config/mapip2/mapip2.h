@@ -90,8 +90,9 @@ enum reg_class
 #define PROMOTE_MODE(MODE, UNSIGNEDP, TYPE)	 \
 do { \
 	if (GET_MODE_CLASS (MODE) == MODE_INT \
-		&& GET_MODE_SIZE (MODE) < 4) \
+		&& GET_MODE_SIZE (MODE) < 4) { \
 		(MODE) = SImode; \
+		(UNSIGNEDP) = 1; } \
 } while (0)
 
 
@@ -118,6 +119,9 @@ do { \
 #define FRAME_POINTER_REGNUM FP_REGNUM
 #define RETURN_ADDRESS_POINTER_REGNUM RA_REGNUM
 #define ARG_POINTER_REGNUM FP_REGNUM
+/* g13 is the least likely to be used temporary register, so we
+   use it for the static chain */
+#define STATIC_CHAIN_REGNUM (G0_REGNUM+13)
 
 /* register arguments */
 #define FUNCTION_ARG_REGNO_P(regno) ((regno) >= P0_REGNUM && (regno) <= P3_REGNUM)

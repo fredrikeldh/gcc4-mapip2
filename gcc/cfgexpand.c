@@ -2035,7 +2035,7 @@ expand_gimple_stmt_1 (gimple stmt)
 	      {
 		temp = force_operand (temp, target);
 		if (temp != target)
-		  emit_move_insn (target, temp);
+		  convert_move (target, temp, SUBREG_PROMOTED_UNSIGNED_P (target));
 	      }
 	  }
       }

@@ -3459,8 +3459,13 @@ emit_move_insn (rtx x, rtx y)
   rtx y_cst = NULL_RTX;
   rtx last_insn, set;
 
-  gcc_assert (mode != BLKmode
-	      && (GET_MODE (y) == mode || GET_MODE (y) == VOIDmode));
+  if(! (mode != BLKmode
+	      && (GET_MODE (y) == mode || GET_MODE (y) == VOIDmode)))
+	{
+		fprintf(stderr, "emit_move_insn %smode -> %smode\n", GET_MODE_NAME(GET_MODE(y)), GET_MODE_NAME(mode));
+		/*convert_move (x, y, 0);*/
+		*(int*)NULL = 0;
+	}
 
   if (CONSTANT_P (y))
     {

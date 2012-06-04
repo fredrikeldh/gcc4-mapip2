@@ -112,8 +112,21 @@ static bool TARGET_LEGITIMATE_ADDRESS_P(enum machine_mode mode ATTRIBUTE_UNUSED,
 static rtx TARGET_FUNCTION_VALUE (const_tree type,
 	const_tree fn_decl_or_type ATTRIBUTE_UNUSED, bool outgoing ATTRIBUTE_UNUSED)
 {
-  return gen_rtx_REG(TYPE_MODE(type), R0_REGNUM);
+	enum machine_mode mode = TYPE_MODE(type);
+	if(GET_MODE_SIZE(mode) < 4)
+		mode = SImode;
+	return gen_rtx_REG(mode, R0_REGNUM);
 }
+
+#undef TARGET_FUNCTION_VALUE_REGNO_P
+static bool TARGET_FUNCTION_VALUE_REGNO_P (const unsigned int regno)
+{
+	return regno == R0_REGNUM;
+}
+
+#define FUNCTION_ARG_SIZE(MODE, TYPE) \
+	((MODE) != BLKmode ? GET_MODE_SIZE (MODE) \
+	: (unsigned) int_size_in_bytes (TYPE))
 
 #undef TARGET_FUNCTION_ARG_ADVANCE
 static void TARGET_FUNCTION_ARG_ADVANCE (CUMULATIVE_ARGS *ca ATTRIBUTE_UNUSED,
@@ -121,6 +134,7 @@ static void TARGET_FUNCTION_ARG_ADVANCE (CUMULATIVE_ARGS *ca ATTRIBUTE_UNUSED,
 	const_tree type ATTRIBUTE_UNUSED,
 	bool named ATTRIBUTE_UNUSED)
 {
+	*ca += (3 + FUNCTION_ARG_SIZE (mode, type)) / 4;
 }
 
 static const int MAX_ARGS_IN_REGS = 4;
@@ -140,7 +154,10 @@ static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
 		return 0;
 
 	if (type)
-		PROMOTE_MODE (mode, 0, type);
+	{
+		int unsignedp ATTRIBUTE_UNUSED;
+		PROMOTE_MODE (mode, unsignedp, type);
+	}
 
 	switch (mode)
 	{
