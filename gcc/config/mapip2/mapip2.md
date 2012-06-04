@@ -46,22 +46,59 @@
 	(CC_REGNUM		34)])
 
 (define_insn "movsi"
-	[(set (match_operand:SI 0 "nonimmediate_operand" "")
-		(match_operand:SI 1 "general_operand" ""))]
+	[(set (match_operand:SI 0 "nonimmediate_operand" "=r,r,r,m")
+	(match_operand:SI 1 "general_operand" "r,i,m,r"))]
 	""
-	"ld %0,%1")
+	"@
+	ld %0,%1
+	ld %0,%1
+	ld %0,[%1]
+	ld [%0],%1")
 
 (define_insn "movhi"
-	[(set (match_operand:HI 0 "nonimmediate_operand" "")
-		(match_operand:HI 1 "general_operand" ""))]
+	[(set (match_operand:HI 0 "nonimmediate_operand" "=r,r,r,m")
+	(match_operand:HI 1 "general_operand" "r,i,m,r"))]
 	""
-	"ld.h %0,%1")
+	"@
+	ld %0,%1
+	ld %0,%1
+	ld.h %0,[%1]
+	ld.h [%0],%1")
 
 (define_insn "movqi"
-	[(set (match_operand:QI 0 "nonimmediate_operand" "")
-		(match_operand:QI 1 "general_operand" ""))]
+	[(set (match_operand:QI 0 "nonimmediate_operand" "=r,r,r,m")
+		(match_operand:QI 1 "general_operand" "r,i,m,r"))]
 	""
-	"ld.b %0,%1")
+	"@
+	ld %0,%1
+	ld %0,%1
+	ld.b %0,[%1]
+	ld.b [%0],%1")
+
+(define_insn "zero_extendqisi2"
+	[(set (match_operand:SI 0 "register_operand" "=r")
+	(zero_extend:SI (match_operand:QI 1 "register_operand" "0")))]
+	""
+	"and %0,#0xff  ; zero extend")
+
+(define_insn "zero_extendhisi2"
+	[(set (match_operand:SI 0 "register_operand" "=r")
+	(zero_extend:SI (match_operand:HI 1 "register_operand" "0")))]
+	""
+	"and %0,#0xffff ; zero extend")
+
+(define_insn "extendhisi2"
+	[(set (match_operand:SI 0 "register_operand" "=r")
+	(sign_extend:SI (match_operand:HI 1 "register_operand" "r")))]
+	""
+	"xh %0,%1")
+
+(define_insn "extendqisi2"
+	[(set (match_operand:SI 0 "register_operand" "=r")
+	(sign_extend:SI (match_operand:QI 1 "register_operand" "r")))]
+	""
+	"xb %0,%1")
+
 
 (define_insn "jump"
   [(set (pc) (label_ref (match_operand 0 "" "")))]
@@ -135,112 +172,110 @@
 	"neg %0,%1")
 
 
-; todo: whitespace cleanup
 (define_insn "addsi3"
-  [(set (match_operand:SI 0 "register_operand" "=r,r")
-	(plus:SI (match_operand:SI 1 "general_operand" "%0,0")
-		 (match_operand:SI 2 "general_operand" "r,i")))]
-  ""
-  "@
-   add  %0,%2
-   add  %0,%2")
+	[(set (match_operand:SI 0 "register_operand" "=r,r")
+		(plus:SI (match_operand:SI 1 "general_operand" "0,0")
+		(match_operand:SI 2 "general_operand" "r,i")))]
+	""
+	"@
+	add %0,%2
+	add %0,%2")
 
 (define_insn "subsi3"
-  [(set (match_operand:SI 0 "register_operand" "=r,r")
-	(minus:SI (match_operand:SI 1 "register_operand" "0,0")
-		  (match_operand:SI 2 "general_operand" "r,i")))]
-  ""
-  "@
-   sub  %0,%2
-   sub  %0,%2")
+	[(set (match_operand:SI 0 "register_operand" "=r,r")
+		(minus:SI (match_operand:SI 1 "register_operand" "0,0")
+		(match_operand:SI 2 "general_operand" "r,i")))]
+	""
+	"@
+	sub %0,%2
+	sub %0,%2")
 
 ;; multiply
 (define_insn "mulsi3"
-  [(set (match_operand:SI 0 "register_operand" "=r,r")
-	(mult:SI (match_operand:SI 1 "register_operand" "0,0")
-		 (match_operand:SI 2 "general_operand" "r,i")))]
-  ""
-  "@
-   mul  %0,%2
-   mul  %0,%2")
+	[(set (match_operand:SI 0 "register_operand" "=r,r")
+		(mult:SI (match_operand:SI 1 "register_operand" "0,0")
+		(match_operand:SI 2 "general_operand" "r,i")))]
+	""
+	"@
+	mul %0,%2
+	mul %0,%2")
 
 ;; divide (signed)
 (define_insn "divsi3"
-  [(set (match_operand:SI 0 "register_operand" "=r,r")
-	(div:SI (match_operand:SI 1 "register_operand" "0,0")
+	[(set (match_operand:SI 0 "register_operand" "=r,r")
+		(div:SI (match_operand:SI 1 "register_operand" "0,0")
 		(match_operand:SI 2 "general_operand" "r,i")))]
-  ""
-  "@
-  div  %0,%2
-  div  %0,%2"
-)
+	""
+	"@
+	div %0,%2
+	div %0,%2")
 
 ;; divide (unsigned)
 (define_insn "udivsi3"
-  [(set (match_operand:SI 0 "register_operand" "=r,r")
-	(udiv:SI (match_operand:SI 1 "register_operand" "0,0")
-		 (match_operand:SI 2 "general_operand" "r,i")))]
-  ""
-  "@
-  divu %0,%2
-  divu %0,%2")
+	[(set (match_operand:SI 0 "register_operand" "=r,r")
+		(udiv:SI (match_operand:SI 1 "register_operand" "0,0")
+		(match_operand:SI 2 "general_operand" "r,i")))]
+	""
+	"@
+	divu %0,%2
+	divu %0,%2")
 
 ;; and
 (define_insn "andsi3"
-  [(set (match_operand:SI 0 "register_operand" "=r,r")
-	(and:SI (match_operand:SI 1 "register_operand" "%0,0")
+	[(set (match_operand:SI 0 "register_operand" "=r,r")
+		(and:SI (match_operand:SI 1 "register_operand" "%0,0")
 		(match_operand:SI 2 "general_operand" "r,i")))]
-  ""
-  "@
-  and  %0,%2
-  and  %0,%2")
+	""
+	"@
+	and %0,%2
+	and %0,%2")
 
 ;; or
 (define_insn "iorsi3"
-  [(set (match_operand:SI 0 "register_operand" "=r,r")
-	(ior:SI (match_operand:SI 1 "register_operand" "0,0")
+	[(set (match_operand:SI 0 "register_operand" "=r,r")
+		(ior:SI (match_operand:SI 1 "register_operand" "0,0")
 		(match_operand:SI 2 "nonmemory_operand" "r,i")))]
-  ""
-  "@
-  or   %0,%2
-  or   %0,%2")
+	""
+	"@
+	or %0,%2
+	or %0,%2")
 
 ;; xor
 (define_insn "xorsi3"
-  [(set (match_operand:SI 0 "register_operand" "=r,r")
-	(xor:SI (match_operand:SI 1 "register_operand" "%0,0")
+	[(set (match_operand:SI 0 "register_operand" "=r,r")
+		(xor:SI (match_operand:SI 1 "register_operand" "0,0")
 		(match_operand:SI 2 "general_operand" "r,i")))]
-  ""
-  "@
-  xor  %0,%2
-  xor  %0,%2")
+	""
+	"@
+	xor %0,%2
+	xor %0,%2")
 
 ;; Shift left
 (define_insn "ashlsi3"
-  [(set (match_operand:SI 0 "register_operand" "=r,r")
-	(ashift:SI (match_operand:SI 1 "register_operand" "0,0")
-		   (match_operand:SI 2 "general_operand" "r,i")))]
-  ""
-  "@
-  sll  %0,%2
-  sll  %0,%2")
+	[(set (match_operand:SI 0 "register_operand" "=r,r")
+		(ashift:SI (match_operand:SI 1 "register_operand" "0,0")
+		(match_operand:SI 2 "general_operand" "r,i")))]
+	""
+	"@
+	sll %0,%2
+	sll %0,%2")
 
 ;; Arithmetic shift right
 (define_insn "ashrsi3"
-  [(set (match_operand:SI 0 "register_operand" "=r,r")
-	(ashiftrt:SI (match_operand:SI 1 "register_operand" "0,0")
-		     (match_operand:SI 2 "general_operand" "r,i")))]
-  ""
-  "@
-  sra  %0,%2
-  sra  %0,%2")
+	[(set (match_operand:SI 0 "register_operand" "=r,r")
+		(ashiftrt:SI (match_operand:SI 1 "register_operand" "0,0")
+		(match_operand:SI 2 "general_operand" "r,i")))]
+	""
+	"@
+	sra %0,%2
+	sra %0,%2")
 
 ;; Logical shift right
 (define_insn "lshrsi3"
-  [(set (match_operand:SI 0 "register_operand" "=r,r")
-	(lshiftrt:SI (match_operand:SI 1 "register_operand" "0,0")
-		     (match_operand:SI 2 "general_operand" "r,i")))]
-  ""
-  "@
-  srl  %0,%2
-  srl  %0,%2")
+	[(set (match_operand:SI 0 "register_operand" "=r,r")
+		(lshiftrt:SI (match_operand:SI 1 "register_operand" "0,0")
+		(match_operand:SI 2 "general_operand" "r,i")))]
+	""
+	"@
+	srl %0,%2
+	srl %0,%2")

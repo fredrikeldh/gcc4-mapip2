@@ -359,6 +359,9 @@ static bool TARGET_ASM_INTEGER (rtx x, unsigned int size, int aligned_p)
 	return default_assemble_integer (x, size, aligned_p);
 }
 
+#undef TARGET_PROMOTE_FUNCTION_MODE
+#define TARGET_PROMOTE_FUNCTION_MODE default_promote_function_mode_always_promote
+
 
 
 /* Initialize the GCC target structure.  */
@@ -367,7 +370,7 @@ struct gcc_target targetm = TARGET_INITIALIZER;
 
 
 
-void ASM_GENERATE_INTERNAL_LABEL(char *buf, const char *prefix, int num)
+void mapip2_asm_generate_internal_label(char *buf, const char *prefix, int num)
 {
 	if (strcmp(prefix, "L") == 0)			/* instruction labels */
 	{
@@ -384,24 +387,24 @@ void ASM_GENERATE_INTERNAL_LABEL(char *buf, const char *prefix, int num)
 	sprintf (buf, "*%s%d", prefix, num);
 }
 
-void ASM_OUTPUT_ALIGN(FILE* stream, int power)
+void mapip2_asm_output_align(FILE* stream, int power)
 {
 	fprintf(stream, ".align %i\n", 1 << power);
 }
 
-void ASM_OUTPUT_COMMON(FILE* stream, const char* name, int size, int rounded)
+void mapip2_asm_output_common(FILE* stream, const char* name, int size, int rounded)
 {
 	fprintf(stream, ".comm\t");
 	assemble_name(stream, name);
 	fprintf(stream, ", %d\t// size=%d\n", rounded, size);
 }
 
-void ASM_OUTPUT_SKIP(FILE* stream, int nbytes)
+void mapip2_asm_output_skip(FILE* stream, int nbytes)
 {
   fprintf(stream, ".space\t%u\t//(ASM_OUTPUT_SKIP)\n", (nbytes));
 }
 
-void ASM_OUTPUT_LOCAL(FILE* stream, const char* name, int size, int rounded)
+void mapip2_asm_output_local(FILE* stream, const char* name, int size, int rounded)
 {
   fprintf(stream, ".lcomm\t");
   assemble_name(stream, name);
@@ -435,4 +438,14 @@ static void print_mem_expr_old (FILE *file, rtx op)
 	default:
 		TARGET_PRINT_OPERAND (file, op, 0);
 	}
+}
+
+void mapip2_asm_output_addr_diff_elt(FILE* stream, rtx body ATTRIBUTE_UNUSED, int value, int rel)
+{
+	fprintf(stream, ".word L%d-L%d\n", value, rel);
+}
+
+void mapip2_asm_output_addr_vec_elt(FILE* stream, int value)
+{
+	fprintf(stream, ".word L%d\n", value);
 }

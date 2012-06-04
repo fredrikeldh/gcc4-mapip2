@@ -97,6 +97,8 @@ do { \
 
 /* type layout */
 #define DEFAULT_SIGNED_CHAR 0
+#define WCHAR_TYPE_SIZE 16
+#define WCHAR_TYPE "short unsigned int"
 
 /* addressing modes */
 #define MAX_REGS_PER_ADDRESS 1
@@ -136,21 +138,36 @@ typedef int CUMULATIVE_ARGS;
 #define TRAMPOLINE_SIZE 4
 
 /* frame layout */
+#define STACK_GROWS_DOWNWARD 1
 #define STARTING_FRAME_OFFSET 0
 #define FIRST_PARM_OFFSET(fundecl) 0
 #define INCOMING_RETURN_ADDR_RTX gen_rtx_REG(SImode, RA_REGNUM)
 #define DWARF_FRAME_RETURN_COLUMN RA_REGNUM
 
+/* Can't declare ASM_* functions directly;
+compiler uses #ifdef to check for availability. */
+
 /* label output */
-void ASM_GENERATE_INTERNAL_LABEL PARAMS ((char* buf, const char*  prefix, int num));
+#define ASM_GENERATE_INTERNAL_LABEL mapip2_asm_generate_internal_label
+void mapip2_asm_generate_internal_label PARAMS ((char* buf, const char*  prefix, int num));
 
 /* alignment output */
-void ASM_OUTPUT_ALIGN PARAMS ((FILE* stream, int power));
-void ASM_OUTPUT_SKIP PARAMS ((FILE* stream, int nbytes));
+#define ASM_OUTPUT_ALIGN mapip2_asm_output_align
+void mapip2_asm_output_align PARAMS ((FILE* stream, int power));
+#define ASM_OUTPUT_SKIP mapip2_asm_output_skip
+void mapip2_asm_output_skip PARAMS ((FILE* stream, int nbytes));
 
 /* uninitialized data */
-void ASM_OUTPUT_COMMON PARAMS ((FILE* stream, const char* name, int size, int rounded));
-void ASM_OUTPUT_LOCAL PARAMS ((FILE* stream, const char* name, int size, int rounded));
+#define ASM_OUTPUT_COMMON mapip2_asm_output_common
+void mapip2_asm_output_common PARAMS ((FILE* stream, const char* name, int size, int rounded));
+#define ASM_OUTPUT_LOCAL mapip2_asm_output_local
+void mapip2_asm_output_local PARAMS ((FILE* stream, const char* name, int size, int rounded));
+
+/* dispatch tables */
+#define ASM_OUTPUT_ADDR_DIFF_ELT mapip2_asm_output_addr_diff_elt
+void mapip2_asm_output_addr_diff_elt PARAMS ((FILE* stream, rtx body, int value, int rel));
+#define ASM_OUTPUT_ADDR_VEC_ELT mapip2_asm_output_addr_vec_elt
+void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 
 /* instruction output */
 #define REGISTER_NAMES \
