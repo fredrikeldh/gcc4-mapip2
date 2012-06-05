@@ -87,13 +87,26 @@ enum reg_class
 #define WORDS_BIG_ENDIAN 0
 #define FUNCTION_BOUNDARY 8
 #define STACK_SAVEAREA_MODE(LEVEL) Pmode
-#define PROMOTE_MODE(MODE, UNSIGNEDP, TYPE)	 \
+#define PROMOTE_MODE(MODE, UNSIGNEDP, TYPE) \
 do { \
 	if (GET_MODE_CLASS (MODE) == MODE_INT \
 		&& GET_MODE_SIZE (MODE) < 4) { \
 		(MODE) = SImode; \
 		(UNSIGNEDP) = 1; } \
 } while (0)
+
+#define CONSTANT_ALIGNMENT(EXP, ALIGN) \
+	((TREE_CODE (EXP) == STRING_CST  || TREE_CODE (EXP) == CONSTRUCTOR) \
+	&& (ALIGN) < BITS_PER_WORD ? BITS_PER_WORD : (ALIGN))
+
+#undef DATA_ALIGNMENT
+#define DATA_ALIGNMENT(TYPE, ALIGN) \
+	((((ALIGN) < BITS_PER_WORD) \
+	&& (TREE_CODE (TYPE) == ARRAY_TYPE \
+	|| TREE_CODE (TYPE) == UNION_TYPE \
+	|| TREE_CODE (TYPE) == RECORD_TYPE)) ? BITS_PER_WORD : (ALIGN))
+
+#define LOCAL_ALIGNMENT DATA_ALIGNMENT
 
 
 /* type layout */
@@ -113,6 +126,7 @@ do { \
 #define CASE_VECTOR_MODE Pmode
 #define HAS_LONG_COND_BRANCH 1
 #define HAS_LONG_UNCOND_BRANCH 1
+#define WORD_REGISTER_OPERATIONS
 
 /* frame registers */
 #define STACK_POINTER_REGNUM SP_REGNUM
@@ -207,10 +221,13 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 #define EXTRA_ADDRESS_CONSTRAINT(c, str) 0
 
 /* debugging info */
+#if 0
 #define DWARF2_DEBUGGING_INFO 1
-#define PREFERRED_DEBUGGING_TYPE DWARF2_DEBUG
 #define DWARF2_ASM_LINE_DEBUG_INFO 1
-
+#else
+#define DBX_DEBUGGING_INFO 1
+#endif
+#define PREFERRED_DEBUGGING_TYPE DBX_DEBUG
 
 /* sections */
 #define TEXT_SECTION_ASM_OP ".text"
