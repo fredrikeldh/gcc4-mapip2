@@ -123,6 +123,9 @@ do { \
    use it for the static chain */
 #define STATIC_CHAIN_REGNUM (G0_REGNUM+13)
 
+/* exception handling */
+#define EH_RETURN_DATA_REGNO(N) ((N) < 2 ? (N) + G0_REGNUM : INVALID_REGNUM)
+
 /* register arguments */
 #define FUNCTION_ARG_REGNO_P(regno) ((regno) >= P0_REGNUM && (regno) <= P3_REGNUM)
 typedef int CUMULATIVE_ARGS;
@@ -207,6 +210,7 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 #define DWARF2_DEBUGGING_INFO 1
 #define PREFERRED_DEBUGGING_TYPE DWARF2_DEBUG
 #define DWARF2_ASM_LINE_DEBUG_INFO 1
+
 
 /* sections */
 #define TEXT_SECTION_ASM_OP ".text"

@@ -391,6 +391,11 @@ rtx
 gen_raw_REG (enum machine_mode mode, int regno)
 {
   rtx x = gen_rtx_raw_REG (mode, regno);
+	if(regno < 0) {
+		/*fprintf(stderr, "gen_raw_REG(%smode, %i)\n", GET_MODE_NAME(mode), regno);*/
+		if(mode != VOIDmode)
+			*(int*)NULL = 0;
+	}
   ORIGINAL_REGNO (x) = regno;
   return x;
 }
@@ -501,7 +506,7 @@ rtx_to_double_int (const_rtx cst)
     }
   else
     gcc_unreachable ();
-  
+
   return r;
 }
 
@@ -1793,7 +1798,7 @@ set_mem_attributes_minus_bitpos (rtx ref, tree t, int objectp,
 	}
 
       /* If this is an indirect reference, record it.  */
-      else if (TREE_CODE (t) == MEM_REF 
+      else if (TREE_CODE (t) == MEM_REF
 	       || TREE_CODE (t) == TARGET_MEM_REF)
 	{
 	  expr = t;
