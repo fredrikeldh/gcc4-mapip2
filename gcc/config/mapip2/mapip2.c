@@ -261,12 +261,17 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 		{
 			REAL_VALUE_TYPE d;
 			long l;
+			union {
+				REAL_VALUE_TYPE r;
+				double d;
+			} u;
 
 			fprintf (file, "#");
 			REAL_VALUE_FROM_CONST_DOUBLE (d, x);
 			REAL_VALUE_TO_TARGET_SINGLE (d, l);
 			fprintf (file, HOST_WIDE_INT_PRINT_HEX, l);
-			fprintf(file, "\t\t; %.12g", *(double*)&d);
+			u.r = d;
+			fprintf(file, "\t\t; %.12g", u.d);
 			return;
 		}
 
