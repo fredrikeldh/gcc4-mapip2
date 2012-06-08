@@ -232,7 +232,7 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 /* sections */
 #define TEXT_SECTION_ASM_OP ".text"
 #define DATA_SECTION_ASM_OP	".data"
-#define READONLY_DATA_SECTION_ASM_OP ".rodata"
+#define READONLY_DATA_SECTION_ASM_OP ".section .rodata"
 #define BSS_SECTION_ASM_OP	".bss"
 
 

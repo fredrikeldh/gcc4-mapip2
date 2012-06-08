@@ -277,8 +277,15 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 
 	/* !! End */
 
+		/* output zero register in special cases where it is allowed. */
+		if(code == CONST_INT && letter == 'z' && INTVAL (x) == 0)
+		{
+			fprintf(file, "zr");
+			return;
+		}
+
 		fprintf (file, "#");
-		fprintf (file, HOST_WIDE_INT_PRINT_HEX, INTVAL (x));
+		fprintf (file, "%i", (int)INTVAL (x));
 		return;
 	}
 
@@ -300,6 +307,7 @@ static void TARGET_PRINT_OPERAND_ADDRESS(FILE *file, rtx addr)
 	{
 	case REG:
 		fputs (reg_names[REGNO (addr)], file);
+		fputs (",0", file);
 		break;
 
 	case PLUS:
@@ -372,7 +380,7 @@ static bool TARGET_ASM_INTEGER (rtx x, unsigned int size, int aligned_p)
 	/* work around a bug in assemble_integer() */
 	if (size == UNITS_PER_WORD)
 	{
-		fputs (".word ", asm_out_file);
+		fputs (".long ", asm_out_file);
 		output_addr_const (asm_out_file, x);
 		fputs ("\n", asm_out_file);
 		return true;
@@ -464,10 +472,10 @@ static void print_mem_expr_old (FILE *file, rtx op)
 
 void mapip2_asm_output_addr_diff_elt(FILE* stream, rtx body ATTRIBUTE_UNUSED, int value, int rel)
 {
-	fprintf(stream, ".word L%d-L%d\n", value, rel);
+	fprintf(stream, ".long L%d-L%d\n", value, rel);
 }
 
 void mapip2_asm_output_addr_vec_elt(FILE* stream, int value)
 {
-	fprintf(stream, ".word L%d\n", value);
+	fprintf(stream, ".long L%d\n", value);
 }

@@ -6,6 +6,14 @@
 			|| GET_CODE (XEXP (op, 0)) == REG));
 })
 
+(define_predicate "const0_operand"
+	(and (match_code "const_int")
+	(match_test "op == CONST0_RTX (mode)")))
+
+(define_predicate "reg_or_0_operand"
+	(ior (match_operand 0 "register_operand")
+	(match_operand 0 "const0_operand")))
+
 (define_constants
 	[(ZERO_REGNUM 0)
 	(SP_REGNUM		1)
@@ -50,42 +58,42 @@
 	(match_operand:SI 1 "general_operand" "r,i,m,r"))]
 	""
 	"@
-	ld %0,%1
-	ld %0,%1
+	ld %0,%z1
+	ld %0,%z1
 	ld %0,[%1]
-	ld [%0],%1")
+	ld [%0],%z1")
 
 (define_insn "movhi"
 	[(set (match_operand:HI 0 "nonimmediate_operand" "=r,r,r,m")
 	(match_operand:HI 1 "general_operand" "r,i,m,r"))]
 	""
 	"@
-	ld %0,%1
-	ld %0,%1
+	ld %0,%z1
+	ld %0,%z1
 	ld.h %0,[%1]
-	ld.h [%0],%1")
+	ld.h [%0],%z1")
 
 (define_insn "movqi"
 	[(set (match_operand:QI 0 "nonimmediate_operand" "=r,r,r,m")
 		(match_operand:QI 1 "general_operand" "r,i,m,r"))]
 	""
 	"@
-	ld %0,%1
-	ld %0,%1
+	ld %0,%z1
+	ld %0,%z1
 	ld.b %0,[%1]
-	ld.b [%0],%1")
+	ld.b [%0],%z1")
 
 (define_insn "zero_extendqisi2"
 	[(set (match_operand:SI 0 "register_operand" "=r")
 	(zero_extend:SI (match_operand:QI 1 "register_operand" "0")))]
 	""
-	"and %0,#0xff  ; zero extend")
+	"and %0,#0xff  // zero extend")
 
 (define_insn "zero_extendhisi2"
 	[(set (match_operand:SI 0 "register_operand" "=r")
 	(zero_extend:SI (match_operand:HI 1 "register_operand" "0")))]
 	""
-	"and %0,#0xffff ; zero extend")
+	"and %0,#0xffff // zero extend")
 
 (define_insn "extendhisi2"
 	[(set (match_operand:SI 0 "register_operand" "=r")
@@ -103,19 +111,19 @@
 	[(set (match_operand:QI 0 "register_operand" "=r")
 		(truncate:QI (match_operand:SI 1 "general_operand" "0")))]
 	""
-	"and %0,#0xff  ; truncate")
+	"and %0,#0xff  // truncate")
 
 (define_insn "truncsihi2"
 	[(set (match_operand:HI 0 "register_operand" "=r")
 		(truncate:HI (match_operand:SI 1 "general_operand" "0")))]
 	""
-	"and %0,#0xffff ; truncate")
+	"and %0,#0xffff // truncate")
 
 (define_insn "trunchiqi2"
 	[(set (match_operand:QI 0 "register_operand" "=r")
 		(truncate:QI (match_operand:HI 1 "general_operand" "0")))]
 	""
-	"and %0,#0xff  ; truncate")
+	"and %0,#0xff  // truncate")
 
 
 (define_insn "jump"
@@ -138,12 +146,12 @@
 (define_insn "cbranchsi4"
 	[(set (pc)
 		(if_then_else (match_operator 0 "ordered_comparison_operator"
-		[(match_operand:SI 1 "register_operand" "")
-			(match_operand:SI 2 "general_operand" "g")])
+		[(match_operand:SI 1 "reg_or_0_operand" "")
+			(match_operand:SI 2 "reg_or_0_operand" "")])
 		(label_ref (match_operand 3 "" ""))
 		(pc)))]
 	""
-	"jc %C0,%1,%2,%3")
+	"jc %C0,%z1,%z2,%3")
 
 (define_insn "nop"
 	[(const_int 0)]
@@ -185,9 +193,9 @@
 
 (define_insn "negsi2"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(neg:SI (match_operand:SI 1 "register_operand" "r")))]
+		(neg:SI (match_operand:SI 1 "reg_or_0_operand" "r")))]
 	""
-	"neg %0,%1")
+	"neg %0,%z1")
 
 
 (define_insn "addsi3"
@@ -196,8 +204,8 @@
 		(match_operand:SI 2 "general_operand" "r,i")))]
 	""
 	"@
-	add %0,%2
-	add %0,%2")
+	add %0,%z2
+	add %0,%z2")
 
 (define_insn "subsi3"
 	[(set (match_operand:SI 0 "register_operand" "=r,r")
@@ -205,8 +213,8 @@
 		(match_operand:SI 2 "general_operand" "r,i")))]
 	""
 	"@
-	sub %0,%2
-	sub %0,%2")
+	sub %0,%z2
+	sub %0,%z2")
 
 ;; multiply
 (define_insn "mulsi3"
@@ -215,8 +223,8 @@
 		(match_operand:SI 2 "general_operand" "r,i")))]
 	""
 	"@
-	mul %0,%2
-	mul %0,%2")
+	mul %0,%z2
+	mul %0,%z2")
 
 ;; divide (signed)
 (define_insn "divsi3"
@@ -245,8 +253,8 @@
 		(match_operand:SI 2 "general_operand" "r,i")))]
 	""
 	"@
-	and %0,%2
-	and %0,%2")
+	and %0,%z2
+	and %0,%z2")
 
 ;; or
 (define_insn "iorsi3"
@@ -255,8 +263,8 @@
 		(match_operand:SI 2 "nonmemory_operand" "r,i")))]
 	""
 	"@
-	or %0,%2
-	or %0,%2")
+	or %0,%z2
+	or %0,%z2")
 
 ;; xor
 (define_insn "xorsi3"
@@ -265,8 +273,8 @@
 		(match_operand:SI 2 "general_operand" "r,i")))]
 	""
 	"@
-	xor %0,%2
-	xor %0,%2")
+	xor %0,%z2
+	xor %0,%z2")
 
 ;; Shift left
 (define_insn "ashlsi3"
