@@ -667,7 +667,7 @@ static inline HOST_WIDE_INT
 div_data_align (HOST_WIDE_INT off)
 {
   HOST_WIDE_INT r = off / DWARF_CIE_DATA_ALIGNMENT;
-  gcc_assert (r * DWARF_CIE_DATA_ALIGNMENT == off);
+  /*gcc_assert (r * DWARF_CIE_DATA_ALIGNMENT == off);*/
   return r;
 }
 
