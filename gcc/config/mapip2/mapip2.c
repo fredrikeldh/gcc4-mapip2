@@ -255,6 +255,7 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 
 	if (code == CONST_INT || code == CONST_DOUBLE)
 	{
+		int i;
 	/* !! Added ARH 20-04-08 Fixed problem with immediate floats */
 
 		if (GET_MODE(x) == SFmode)
@@ -285,7 +286,11 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 		}
 
 		fprintf (file, "#");
-		fprintf (file, "%i", (int)INTVAL (x));
+		i = (int)INTVAL (x);
+		if(i >= 0)
+			fprintf (file, "0x%x", i);
+		else
+			fprintf(file, "%i", i);
 		return;
 	}
 
@@ -307,7 +312,6 @@ static void TARGET_PRINT_OPERAND_ADDRESS(FILE *file, rtx addr)
 	{
 	case REG:
 		fputs (reg_names[REGNO (addr)], file);
-		fputs (",0", file);
 		break;
 
 	case PLUS:
@@ -404,7 +408,7 @@ void mapip2_asm_generate_internal_label(char *buf, const char *prefix, int num)
 {
 	if (strcmp(prefix, "L") == 0)			/* instruction labels */
 	{
-		sprintf (buf, "*L%d", num);
+		sprintf (buf, "*L_%d", num);
 		return;
 	}
 

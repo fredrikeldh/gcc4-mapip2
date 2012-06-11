@@ -141,7 +141,7 @@
 		(match_operand:SI 0 "register_operand" "r"))
 		(use (label_ref (match_operand 1 "" "")))]
 	""
-	"jp %0 ;%1")
+	"jp %0	//%1")
 
 (define_insn "cbranchsi4"
 	[(set (pc)
@@ -151,7 +151,7 @@
 		(label_ref (match_operand 3 "" ""))
 		(pc)))]
 	""
-	"jc %C0,%z1,%z2,%3")
+	"jc %C0,%z1,%z2,[%3]")
 
 (define_insn "nop"
 	[(const_int 0)]

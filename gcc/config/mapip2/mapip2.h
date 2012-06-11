@@ -211,8 +211,9 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 #define INITIAL_FRAME_POINTER_OFFSET(depth) (depth) = 0
 
 /* file framework */
-#define ASM_APP_ON "#APP"
-#define ASM_APP_OFF "#NO_APP"
+#define ASM_COMMENT_START "//"
+#define ASM_APP_ON "//APP"
+#define ASM_APP_OFF "//NO_APP"
 
 /* old constraints */
 #define CONST_DOUBLE_OK_FOR_LETTER_P(value, c) 0
