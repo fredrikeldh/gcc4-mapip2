@@ -53,6 +53,12 @@
 	(ARG_REGNUM		33)
 	(CC_REGNUM		34)])
 
+; put this first so movsi doesn't get insn_code 0, which appears to trigger an internal gcc bug.
+(define_insn "nop"
+	[(const_int 0)]
+	"1"
+	"")
+
 (define_insn "movsi"
 	[(set (match_operand:SI 0 "nonimmediate_operand" "=r,r,r,m")
 	(match_operand:SI 1 "general_operand" "r,i,m,r"))]
@@ -152,11 +158,6 @@
 		(pc)))]
 	""
 	"jc %C0,%z1,%z2,[%3]")
-
-(define_insn "nop"
-	[(const_int 0)]
-	"1"
-	"")
 
 (define_insn "call"
 	[(call (match_operand:SI 0 "memory_operand" "m")
