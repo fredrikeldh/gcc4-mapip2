@@ -89,6 +89,27 @@
 	ld.b %0,[%1]
 	ld.b [%0],%z1")
 
+(define_insn "movsf"
+	[(set (match_operand:SF 0 "nonimmediate_operand" "=r,r,r,m")
+		(match_operand:SF 1 "general_operand" "r,i,m,r"))]
+	""
+	"@
+	ld %0,%z1
+	ld %0,%z1
+	ld %0,[%1]
+	ld [%0],%z1")
+
+;(define_insn "movdf"
+;	[(set (match_operand:DF 0 "nonimmediate_operand" "=r,r,r,m")
+;		(match_operand:DF 1 "general_operand" "r,i,m,r"))]
+;	""
+;	"@
+;	ld.d %0,%z1
+;	ld.d %0,%z1
+;	ld.d %0,[%1]
+;	ld.d [%0],%z1")
+
+
 (define_insn "zero_extendqisi2"
 	[(set (match_operand:SI 0 "register_operand" "=r")
 	(zero_extend:SI (match_operand:QI 1 "register_operand" "0")))]
@@ -152,12 +173,12 @@
 (define_insn "cbranchsi4"
 	[(set (pc)
 		(if_then_else (match_operator 0 "ordered_comparison_operator"
-		[(match_operand:SI 1 "reg_or_0_operand" "")
-			(match_operand:SI 2 "reg_or_0_operand" "")])
+		[(match_operand:SI 1 "reg_or_0_operand" "r")
+			(match_operand:SI 2 "reg_or_0_operand" "r")])
 		(label_ref (match_operand 3 "" ""))
 		(pc)))]
 	""
-	"jc %C0,%z1,%z2,[%3]")
+	"jc %C0,%Z1,%Z2,[%3]")
 
 (define_insn "call"
 	[(call (match_operand:SI 0 "memory_operand" "m")
@@ -169,8 +190,8 @@
 	[(set (match_operand 0 "" "=g")
 		(call (match_operand:SI 1 "memory_operand" "m")
 			(match_operand:SI 2 "general_operand" "g")))]
-  ""
-  "call %1")
+	""
+	"call %1")
 
 (define_insn "return"
 	[(return)
@@ -192,11 +213,19 @@
 	""
 	"pop %0,%1")
 
+
 (define_insn "negsi2"
 	[(set (match_operand:SI 0 "register_operand" "=r")
 		(neg:SI (match_operand:SI 1 "reg_or_0_operand" "r")))]
 	""
 	"neg %0,%z1")
+
+(define_insn "one_cmplsi2"
+	[(set (match_operand:SI 0 "register_operand" "=r")
+		(not:SI (match_operand:SI 1 "reg_or_0_operand" "r")))]
+	""
+	"not %0,%z1")
+
 
 
 (define_insn "addsi3"

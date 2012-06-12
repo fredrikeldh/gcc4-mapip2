@@ -155,6 +155,11 @@ reg_save_code (int reg, enum machine_mode mode)
       cached_reg_save_code[reg][mode] = -1;
       cached_reg_restore_code[reg][mode] = -1;
     }
+    if(!cached_reg_save_code[reg][mode])
+    {
+	printf("reg_save_code[%i][%smode] failed. (ok %i)\n", reg, GET_MODE_NAME(mode), ok);
+	*(int*)NULL = 0;
+    }
   gcc_assert (cached_reg_save_code[reg][mode]);
   return cached_reg_save_code[reg][mode];
 }
@@ -661,7 +666,7 @@ setup_save_areas (void)
     }
   else
     {
-      /* We are not sharing slots. 
+      /* We are not sharing slots.
 
 	 Run through all the call-used hard-registers and allocate
 	 space for each in the caller-save area.  Try to allocate space

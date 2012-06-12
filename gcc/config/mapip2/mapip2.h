@@ -206,6 +206,7 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 
 /* costs */
 #define SLOW_BYTE_ACCESS 1
+#define NO_FUNCTION_CSE
 
 /* elimination */
 #define INITIAL_FRAME_POINTER_OFFSET(depth) (depth) = 0

@@ -6604,8 +6604,9 @@ count_reg_usage (rtx x, int *counts, rtx dest, int incr)
     {
     case REG:
       if (x != dest) {
-		if(REGNO (x) > 1000) {
+		if((int)REGNO (x) < 0) {
 			fprintf(stderr, "regno %i, %smode\n", REGNO(x), GET_MODE_NAME(GET_MODE(x)));
+			gcc_assert(false);
 		} else
 	counts[REGNO (x)] += incr;
       }

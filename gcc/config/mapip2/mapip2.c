@@ -75,11 +75,11 @@ static bool TARGET_LEGITIMATE_ADDRESS_P(enum machine_mode mode ATTRIBUTE_UNUSED,
 	valid = 0;
 	if (GET_CODE (x) == PLUS)
 	{
-		register rtx x0 = XEXP (x, 0);
-		register rtx x1 = XEXP (x, 1);
+		rtx x0 = XEXP (x, 0);
+		rtx x1 = XEXP (x, 1);
 
-		register enum rtx_code c0;
-		register enum rtx_code c1;
+		enum rtx_code c0;
+		enum rtx_code c1;
 
 		while (GET_CODE (x0) == SUBREG)
 			x0 = SUBREG_REG (x0);
@@ -98,11 +98,13 @@ static bool TARGET_LEGITIMATE_ADDRESS_P(enum machine_mode mode ATTRIBUTE_UNUSED,
 				valid = 1;
 		}
 
+#if 0
 		if (!valid)
 		{
-		/*  	  fprintf (stderr, "INVALID(%d): ", reload_completed); */
-		/*  	  debug_rtx (x); */
+			fprintf (stderr, "INVALID(%d): ", reload_completed);
+			debug_rtx (x);
 		}
+#endif
 	}
 
   return valid;
@@ -213,6 +215,17 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 
 	code = GET_CODE (x);
 
+	if(letter == 'Z') {
+		if(code == CONST_INT && INTVAL (x) == 0) {
+			/* output zero register in special cases where it is allowed. */
+			fprintf(file, "zr");
+			return;
+		} else if (code != REG) {
+			/* letter z is allowed for reg or const_int only. */
+			abort_with_insn (x, "PRINT_OPERAND, invalid operand for %Z");
+		}
+	}
+
 	if (code == SIGN_EXTEND)
 		x = XEXP (x, 0), code = GET_CODE (x);
 
@@ -272,7 +285,7 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 			REAL_VALUE_TO_TARGET_SINGLE (d, l);
 			fprintf (file, HOST_WIDE_INT_PRINT_HEX, l);
 			u.r = d;
-			fprintf(file, "\t\t; %.12g", u.d);
+			fprintf(file, "\t\t// %.12g", u.d);
 			return;
 		}
 
