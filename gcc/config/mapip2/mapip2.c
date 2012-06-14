@@ -416,12 +416,17 @@ static bool TARGET_ASM_INTEGER (rtx x, unsigned int size, int aligned_p)
 struct gcc_target targetm = TARGET_INITIALIZER;
 
 
+void mapip2_asm_output_labelref(FILE* stream, const char* name)
+{
+  fputc('_', stream);
+  fputs(name, stream);
+}
 
 void mapip2_asm_generate_internal_label(char *buf, const char *prefix, int num)
 {
 	if (strcmp(prefix, "L") == 0)			/* instruction labels */
 	{
-		sprintf (buf, "*L_%d", num);
+		sprintf (buf, "*L%d", num);
 		return;
 	}
 

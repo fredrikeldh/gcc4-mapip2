@@ -171,6 +171,8 @@ compiler uses #ifdef to check for availability. */
 /* label output */
 #define ASM_GENERATE_INTERNAL_LABEL mapip2_asm_generate_internal_label
 void mapip2_asm_generate_internal_label PARAMS ((char* buf, const char*  prefix, int num));
+#define ASM_OUTPUT_LABELREF mapip2_asm_output_labelref
+void mapip2_asm_output_labelref PARAMS ((FILE* stream, const char* name));
 
 /* alignment output */
 #define ASM_OUTPUT_ALIGN mapip2_asm_output_align
@@ -233,9 +235,13 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 
 /* sections */
 #define TEXT_SECTION_ASM_OP ".text"
-#define DATA_SECTION_ASM_OP	".data"
+#define DATA_SECTION_ASM_OP ".data"
 #define READONLY_DATA_SECTION_ASM_OP ".section .rodata"
-#define BSS_SECTION_ASM_OP	".bss"
+#define BSS_SECTION_ASM_OP ".bss"
+
+/* driver */
+
+#define CC1PLUS_SPEC "%{!frtti:-fno-rtti} %{!fexceptions:-fno-exceptions}"
 
 
 #define GCC_INSN_FLAGS_H	/* enable all default values */
