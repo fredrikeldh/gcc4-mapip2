@@ -154,9 +154,9 @@
 
 
 (define_insn "jump"
-  [(set (pc) (label_ref (match_operand 0 "" "")))]
-  ""
-  "jp %0")
+	[(set (pc) (label_ref (match_operand 0 "" "")))]
+	""
+	"jp %0")
 
 (define_insn "indirect_jump"
 	[(set (pc) (match_operand:SI 0 "register_operand" "r"))]
@@ -184,14 +184,14 @@
 	[(call (match_operand:SI 0 "memory_operand" "m")
 		(match_operand:SI 1 "general_operand" "g"))]
 	""
-	"call %0")
+	"call %0	//%1")
 
 (define_insn "call_value"
 	[(set (match_operand 0 "" "=g")
 		(call (match_operand:SI 1 "memory_operand" "m")
 			(match_operand:SI 2 "general_operand" "g")))]
 	""
-	"call %1")
+	"call %1	//%2, %0")
 
 (define_insn "return"
 	[(return)

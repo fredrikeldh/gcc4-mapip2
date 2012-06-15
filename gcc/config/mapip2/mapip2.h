@@ -173,6 +173,8 @@ compiler uses #ifdef to check for availability. */
 void mapip2_asm_generate_internal_label PARAMS ((char* buf, const char*  prefix, int num));
 #define ASM_OUTPUT_LABELREF mapip2_asm_output_labelref
 void mapip2_asm_output_labelref PARAMS ((FILE* stream, const char* name));
+#define ASM_WEAKEN_LABEL mapip2_asm_weaken_label
+void mapip2_asm_weaken_label PARAMS ((FILE* stream, const char* name));
 
 /* alignment output */
 #define ASM_OUTPUT_ALIGN mapip2_asm_output_align

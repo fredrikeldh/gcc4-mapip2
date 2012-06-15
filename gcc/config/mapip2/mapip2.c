@@ -418,8 +418,15 @@ struct gcc_target targetm = TARGET_INITIALIZER;
 
 void mapip2_asm_output_labelref(FILE* stream, const char* name)
 {
-  fputc('_', stream);
-  fputs(name, stream);
+	fputc('_', stream);
+	fputs(name, stream);
+}
+
+void mapip2_asm_weaken_label(FILE* stream, const char* name)
+{
+	fputs(".weak ", stream);
+	assemble_name(stream, name);
+	fputc('\n', stream);
 }
 
 void mapip2_asm_generate_internal_label(char *buf, const char *prefix, int num)
