@@ -300,14 +300,14 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 
 		fprintf (file, "#");
 		i = (int)INTVAL (x);
-		if(i >= 0)
+		if(i >= 0 || i < -256)
 			fprintf (file, "0x%x", i);
 		else
 			fprintf(file, "%i", i);
 		return;
 	}
 
-	fprintf (file, "#");
+	fprintf (file, "&");
 	output_addr_const (file, x);
 }
 

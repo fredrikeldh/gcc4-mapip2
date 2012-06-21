@@ -173,12 +173,12 @@
 (define_insn "cbranchsi4"
 	[(set (pc)
 		(if_then_else (match_operator 0 "ordered_comparison_operator"
-		[(match_operand:SI 1 "reg_or_0_operand" "r")
-			(match_operand:SI 2 "reg_or_0_operand" "r")])
+		[(match_operand:SI 1 "reg_or_0_operand" "")
+			(match_operand:SI 2 "reg_or_0_operand" "")])
 		(label_ref (match_operand 3 "" ""))
 		(pc)))]
 	""
-	"jc %C0,%Z1,%Z2,[%3]")
+	"jc %C0 %Z1,%Z2,%3")
 
 (define_insn "call"
 	[(call (match_operand:SI 0 "memory_operand" "m")
