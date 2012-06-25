@@ -160,6 +160,7 @@ typedef int CUMULATIVE_ARGS;
 
 /* frame layout */
 #define STACK_GROWS_DOWNWARD 1
+#define FRAME_GROWS_DOWNWARD 1
 #define STARTING_FRAME_OFFSET 0
 #define FIRST_PARM_OFFSET(fundecl) 0
 #define INCOMING_RETURN_ADDR_RTX gen_rtx_REG(SImode, RA_REGNUM)

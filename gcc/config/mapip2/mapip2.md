@@ -183,20 +183,21 @@
 
 (define_insn "call"
 	[(call (match_operand:SI 0 "memory_operand" "m")
-		(match_operand:SI 1 "general_operand" "g"))]
+		(match_operand:SI 1 "general_operand" "g"))
+	(clobber (reg:SI RA_REGNUM))]
 	""
 	"call %0	//%1")
 
 (define_insn "call_value"
 	[(set (match_operand 0 "" "=g")
 		(call (match_operand:SI 1 "memory_operand" "m")
-			(match_operand:SI 2 "general_operand" "g")))]
+			(match_operand:SI 2 "general_operand" "g")))
+	(clobber (reg:SI RA_REGNUM))]
 	""
 	"call %1	//%2, %0")
 
 (define_insn "return"
-	[(return)
-		(clobber (reg:SI RA_REGNUM))]
+	[(return)]
 	""
 	"ret")
 

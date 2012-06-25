@@ -84,23 +84,22 @@ static int compute_frame_size(int locals)
 	first = last = 0;
 
 	for (i = RA_REGNUM; i <= LAST_SAVED_REGNUM; i++)
+	{
+		if (SAVE_REGISTER_P (i))
 		{
-			if (SAVE_REGISTER_P (i))
-				{
-					if (!first)
-						first = i;
+			if (!first)
+				first = i;
 
-					last = i;
+			last = i;
 
-					regs += UNITS_PER_WORD;
+			regs += UNITS_PER_WORD;
 
-					if ((rmask & (1 << (i-1))) == 0)
-						rblocks++;
+			if ((rmask & (1 << (i-1))) == 0)
+				rblocks++;
 
-					rmask |= 1 << i;
-				}
+			rmask |= 1 << i;
 		}
-
+	}
 
 	if (SHOULD_COMBINE_STORE_RESTORE)
 		regs = UNITS_PER_WORD * (1 + last - first);
