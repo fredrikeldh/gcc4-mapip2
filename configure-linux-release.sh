@@ -62,4 +62,5 @@ $SRCDIR/configure \
 	--program-prefix=$progpref -v \
 	2>&1 | tee gcc_configure.log
 
+mkdir -p gcc
 touch gcc/insn-flags.h

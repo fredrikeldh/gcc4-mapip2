@@ -251,5 +251,7 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 
 
 void mapip2_expand_call (rtx* operands, int returns_value);
+void mapip2_expand_prologue(void);
+void mapip2_expand_epilogue(void);
 
 #endif	/*MAPIP2_H*/

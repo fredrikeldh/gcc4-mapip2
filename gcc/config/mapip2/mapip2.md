@@ -170,11 +170,12 @@
 	""
 	"jp %0	//%1")
 
+; fixme: allow constant zero
 (define_insn "cbranchsi4"
 	[(set (pc)
 		(if_then_else (match_operator 0 "ordered_comparison_operator"
-		[(match_operand:SI 1 "reg_or_0_operand" "")
-			(match_operand:SI 2 "reg_or_0_operand" "")])
+		[(match_operand:SI 1 "reg_or_0_operand" "r")
+			(match_operand:SI 2 "reg_or_0_operand" "r")])
 		(label_ref (match_operand 3 "" ""))
 		(pc)))]
 	""
@@ -198,6 +199,24 @@
 		(clobber (reg:SI RA_REGNUM))]
 	""
 	"ret")
+
+(define_expand "prologue"
+	[(const_int 1)]
+	""
+	"
+{
+	mapip2_expand_prologue();
+	DONE;
+}")
+
+(define_expand "epilogue"
+	[(const_int 2)]
+	""
+	"
+{
+	mapip2_expand_epilogue();
+	DONE;
+}")
 
 (define_insn "store_regs"
 	[(match_operand:SI 0 "register_operand" "")
