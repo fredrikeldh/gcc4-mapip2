@@ -176,6 +176,11 @@ void mapip2_asm_generate_internal_label PARAMS ((char* buf, const char*  prefix,
 void mapip2_asm_output_labelref PARAMS ((FILE* stream, const char* name));
 #define ASM_WEAKEN_LABEL mapip2_asm_weaken_label
 void mapip2_asm_weaken_label PARAMS ((FILE* stream, const char* name));
+#define ASM_OUTPUT_WEAK_ALIAS mapip2_asm_output_weak_alias
+void mapip2_asm_output_weak_alias PARAMS ((FILE* stream, const char* name, const char* value));
+
+/* disabled because it creates ugly code. */
+/* #define SET_ASM_OP ".set\t" */
 
 /* alignment output */
 #define ASM_OUTPUT_ALIGN mapip2_asm_output_align

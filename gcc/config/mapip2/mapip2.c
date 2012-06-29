@@ -524,6 +524,17 @@ void mapip2_asm_weaken_label(FILE* stream, const char* name)
 	fputc('\n', stream);
 }
 
+void mapip2_asm_output_weak_alias(FILE* stream, const char* name, const char* value)
+{
+	mapip2_asm_weaken_label(stream, name);
+	fputs(".set ", stream);
+	assemble_name(stream, name);
+	fputc(',', stream);
+	assemble_name(stream, value);
+	fputc('\n', stream);
+}
+
+
 void mapip2_asm_generate_internal_label(char *buf, const char *prefix, int num)
 {
 	if (strcmp(prefix, "L") == 0)			/* instruction labels */
@@ -555,14 +566,14 @@ void mapip2_asm_output_common(FILE* stream, const char* name, int size, int roun
 
 void mapip2_asm_output_skip(FILE* stream, int nbytes)
 {
-  fprintf(stream, ".space\t%u\t//(ASM_OUTPUT_SKIP)\n", (nbytes));
+	fprintf(stream, ".space\t%u\t//(ASM_OUTPUT_SKIP)\n", (nbytes));
 }
 
 void mapip2_asm_output_local(FILE* stream, const char* name, int size, int rounded)
 {
-  fprintf(stream, ".lcomm\t");
-  assemble_name(stream, name);
-  fprintf(stream, ", %d\t// size=%d\n", rounded, size);
+	fprintf(stream, ".lcomm\t");
+	assemble_name(stream, name);
+	fprintf(stream, ", %d\t// size=%d\n", rounded, size);
 }
 
 void default_globalize_label(FILE* stream, const char* name)
