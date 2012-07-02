@@ -664,15 +664,9 @@ void mapip2_expand_prologue(void)
 		}
 	}
 
-	adjust = framesize - frame_info.regs;
-	if (adjust != 0)
-	{
-		/* Adjust $sp to make room for locals */
-		emit_insn (gen_subsi3 (sp, sp, GEN_INT (adjust)));
-	}
-
 	if (frame_pointer_needed)
 	{
+#if 0
 		/* Adjust frame pointer to point to arguments */
 		if (framesize > 0)
 		{
@@ -680,9 +674,17 @@ void mapip2_expand_prologue(void)
 			emit_insn (gen_addsi3 (fp, fp, GEN_INT (framesize)));
 		}
 		else
+#endif
 		{
 			emit_move_insn (fp, sp);
 		}
+	}
+
+	adjust = framesize - frame_info.regs;
+	if (adjust != 0)
+	{
+		/* Adjust $sp to make room for locals */
+		emit_insn (gen_subsi3 (sp, sp, GEN_INT (adjust)));
 	}
 }
 
