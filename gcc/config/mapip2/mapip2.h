@@ -249,7 +249,7 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 
 /* driver */
 
-#define CC1PLUS_SPEC "%{!frtti:-fno-rtti} %{!fexceptions:-fno-exceptions}"
+#define CC1PLUS_SPEC "%{!frtti:-fno-rtti} %{!fexceptions:-fno-exceptions} %{!fthreadsafe-statics:-fno-threadsafe-statics}"
 
 
 #define GCC_INSN_FLAGS_H	/* enable all default values */

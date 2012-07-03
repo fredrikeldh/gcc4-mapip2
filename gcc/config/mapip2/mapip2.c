@@ -309,7 +309,7 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 	if(letter == 'Z') {
 		if(code == CONST_INT && INTVAL (x) == 0) {
 			/* output zero register in special cases where it is allowed. */
-			fprintf(file, "zr");
+			fputs("zr", file);
 			return;
 		} else if (code != REG) {
 			fprintf(stderr, "code: %s\n", GET_RTX_NAME(code));
@@ -351,7 +351,7 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 		if (letter == 'D')					/* High part of double */
 			regno++;
 
-		fprintf (file, "%s", reg_names[regno]);
+		fputs(reg_names[regno], file);
 		return;
 	}
 
@@ -375,7 +375,7 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 				double d;
 			} u;
 
-			fprintf (file, "#");
+			fputc('#', file);
 			REAL_VALUE_FROM_CONST_DOUBLE (d, x);
 			REAL_VALUE_TO_TARGET_SINGLE (d, l);
 			fprintf (file, HOST_WIDE_INT_PRINT_HEX, l);
@@ -389,11 +389,11 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 		/* output zero register in special cases where it is allowed. */
 		if(code == CONST_INT && letter == 'z' && INTVAL (x) == 0)
 		{
-			fprintf(file, "zr");
+			fputs("zr", file);
 			return;
 		}
 
-		fprintf (file, "#");
+		fputc('#', file);
 		i = (int)INTVAL (x);
 		if(i >= 0 || i < -256)
 			fprintf (file, "0x%x", i);
@@ -402,7 +402,7 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 		return;
 	}
 
-	fprintf (file, "&");
+	fputc('&', file);
 	output_addr_const (file, x);
 }
 
@@ -461,6 +461,9 @@ static void TARGET_PRINT_OPERAND_ADDRESS(FILE *file, rtx addr)
 		{
 			if (!CONSTANT_P (offset))
 				abort_with_insn (addr, "PRINT_OPERAND_ADDRESS, invalid insn #2");
+			/*fprintf (file, "(%s)", GET_RTX_NAME(GET_CODE(offset)));*/
+			if(reg && GET_CODE(offset) == CONST)
+				fputc('&', file);
 			output_addr_const (file, offset);
 		}
 	}
@@ -470,7 +473,7 @@ static void TARGET_PRINT_OPERAND_ADDRESS(FILE *file, rtx addr)
 	case SYMBOL_REF:
 	case CONST_INT:
 	case CONST:
-		fprintf (file, "&");
+		fputc('&', file);
 		output_addr_const (file, addr);
 		break;
 

@@ -3,7 +3,7 @@
 export mosyncSource=~/code/mosync-trunk
 
 cd build/release/gcc && \
-#make && \
+make && \
 mkdir -p $MOSYNCDIR/mapip2/ && \
 cp -uv xgcc $MOSYNCDIR/mapip2/ && \
 mkdir -p $MOSYNCDIR/libexec/gcc/mapip2/4.6.3/ && \
@@ -12,11 +12,17 @@ cp -uv cc1 $MOSYNCDIR/libexec/gcc/mapip2/4.6.3/ && \
 cp -uv cc1plus $MOSYNCDIR/libexec/gcc/mapip2/4.6.3/ && \
 cd $mosyncSource && ./workfile.rb base && \
 cd ~/code/binutils/binutils-mosync && ./workfile.rb && \
-cd $mosyncSource && ./workfile.rb more && \
-cd $mosyncSource/libs/ResCompiler && ./workfile.rb && \
-cd $mosyncSource/libs/MAStd && ./workfile.rb && \
-cd $mosyncSource/examples/cpp/3dLines && ./workfile.rb run && \
+cd $mosyncSource && ./workfile.rb && \
+cd $mosyncSource/examples/ && ./workfile.rb && \
 true
+
+#cd $mosyncSource && ./workfile.rb && \
+#cd $mosyncSource/examples/ && ./workfile.rb && \
+
+#cd $mosyncSource && ./workfile.rb more && \
+#cd $mosyncSource/libs/ResCompiler && ./workfile.rb && \
+#cd $mosyncSource/libs/MAStd && ./workfile.rb && \
+#cd $mosyncSource/examples/cpp/3dLines && ./workfile.rb run && \
 
 #./workfile.rb libs && \
 
