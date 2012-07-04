@@ -619,6 +619,37 @@ void mapip2_asm_output_addr_vec_elt(FILE* stream, int value)
 }
 
 
+/* Return the difference, in bytes, between FP and SP, as it would be after the prologue. */
+int mapip2_initial_frame_pointer_offset(void)
+{
+	long framesize = (frame_info.valid	?
+		frame_info.total_size :
+		compute_frame_size(get_frame_size()));
+	return framesize;
+}
+
+int mapip2_initial_elimination_offset(int from, int to)
+{
+	if(!frame_info.valid)
+	{
+		compute_frame_size(get_frame_size());
+#if 0
+		if(!frame_info.valid)
+			fancy_abort (__FILE__, __LINE__, __FUNCTION__);
+#endif
+	}
+
+	if (from == FRAME_POINTER_REGNUM)
+	{
+		if (to == STACK_POINTER_REGNUM)
+			return frame_info.outgoing + frame_info.locals;
+		else
+			return -frame_info.regs;
+	} else
+		fancy_abort (__FILE__, __LINE__, __FUNCTION__);
+}
+
+
 /* Emit RTL for a function prologue */
 void mapip2_expand_prologue(void)
 {
@@ -667,10 +698,18 @@ void mapip2_expand_prologue(void)
 		}
 	}
 
+	adjust = framesize - frame_info.regs;
+	if (adjust != 0)
+	{
+		/* Adjust $sp to make room for locals */
+		emit_insn (gen_subsi3 (sp, sp, GEN_INT (adjust)));
+	}
+
 	if (frame_pointer_needed)
 	{
-#if 0
-		/* Adjust frame pointer to point to arguments */
+#if 1
+		/* Adjust frame pointer to point to arguments. */
+		/* FP should, after this, have the same value as SP had before the PUSH. */
 		if (framesize > 0)
 		{
 			emit_move_insn (fp, sp);
@@ -681,13 +720,6 @@ void mapip2_expand_prologue(void)
 		{
 			emit_move_insn (fp, sp);
 		}
-	}
-
-	adjust = framesize - frame_info.regs;
-	if (adjust != 0)
-	{
-		/* Adjust $sp to make room for locals */
-		emit_insn (gen_subsi3 (sp, sp, GEN_INT (adjust)));
 	}
 }
 

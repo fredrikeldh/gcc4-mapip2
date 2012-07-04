@@ -130,12 +130,24 @@ do { \
 
 /* frame registers */
 #define STACK_POINTER_REGNUM SP_REGNUM
-#define FRAME_POINTER_REGNUM FP_REGNUM
+#define HARD_FRAME_POINTER_REGNUM FP_REGNUM
+#define FRAME_POINTER_REGNUM 0
 #define RETURN_ADDRESS_POINTER_REGNUM RA_REGNUM
 #define ARG_POINTER_REGNUM FP_REGNUM
 /* g13 is the least likely to be used temporary register, so we
    use it for the static chain */
 #define STATIC_CHAIN_REGNUM (G0_REGNUM+13)
+
+/* elimination */
+#define ELIMINABLE_REGS {\
+	{ FRAME_POINTER_REGNUM, STACK_POINTER_REGNUM },\
+	{ FRAME_POINTER_REGNUM, HARD_FRAME_POINTER_REGNUM },\
+}
+#define INITIAL_FRAME_POINTER_OFFSET(depth) (depth) = mapip2_initial_frame_pointer_offset()
+int mapip2_initial_frame_pointer_offset(void);
+#define INITIAL_ELIMINATION_OFFSET(from, to, offset) \
+	offset = mapip2_initial_elimination_offset(from, to)
+int mapip2_initial_elimination_offset(int from, int to);
 
 /* exception handling */
 #define EH_RETURN_DATA_REGNO(N) ((N) < 2 ? (N) + G0_REGNUM : INVALID_REGNUM)
@@ -165,6 +177,7 @@ typedef int CUMULATIVE_ARGS;
 #define FIRST_PARM_OFFSET(fundecl) 0
 #define INCOMING_RETURN_ADDR_RTX gen_rtx_REG(SImode, RA_REGNUM)
 #define DWARF_FRAME_RETURN_COLUMN RA_REGNUM
+
 
 /* Can't declare ASM_* functions directly;
 compiler uses #ifdef to check for availability. */
@@ -217,9 +230,6 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 /* costs */
 #define SLOW_BYTE_ACCESS 1
 #define NO_FUNCTION_CSE
-
-/* elimination */
-#define INITIAL_FRAME_POINTER_OFFSET(depth) (depth) = 0
 
 /* file framework */
 #define ASM_COMMENT_START "//"
