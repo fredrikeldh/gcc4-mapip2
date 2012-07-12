@@ -368,19 +368,20 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 
 		if (GET_MODE(x) == SFmode)
 		{
-			REAL_VALUE_TYPE d;
-			long l;
+			union {
+				long l;
+				float f;
+			} f;
 			union {
 				REAL_VALUE_TYPE r;
 				double d;
-			} u;
+			} d;
 
 			fputc('#', file);
-			REAL_VALUE_FROM_CONST_DOUBLE (d, x);
-			REAL_VALUE_TO_TARGET_SINGLE (d, l);
-			fprintf (file, HOST_WIDE_INT_PRINT_HEX, l);
-			u.r = d;
-			fprintf(file, "\t\t// %.12g", u.d);
+			REAL_VALUE_FROM_CONST_DOUBLE (d.r, x);
+			REAL_VALUE_TO_TARGET_SINGLE (d.r, f.l);
+			fprintf (file, HOST_WIDE_INT_PRINT_HEX, f.l);
+			fprintf(file, "\t\t// %.12g f(%.6g)", d.d, f.f);
 			return;
 		}
 
@@ -507,6 +508,17 @@ static bool TARGET_ASM_INTEGER (rtx x, unsigned int size, int aligned_p)
 #undef TARGET_PROMOTE_FUNCTION_MODE
 #define TARGET_PROMOTE_FUNCTION_MODE default_promote_function_mode_always_promote
 
+#undef  TARGET_ASM_FUNCTION_EPILOGUE
+static void TARGET_ASM_FUNCTION_EPILOGUE (FILE *file ATTRIBUTE_UNUSED, HOST_WIDE_INT size ATTRIBUTE_UNUSED)
+{
+#if 0
+	fprintf(file, "// epilogue %li\n", size);
+	printf("epilogue %li\n", size);
+#endif
+	/* because mapip2_expand_epilogue() doesn't always get called. */
+	frame_info.valid = 0;
+}
+
 
 
 /* Initialize the GCC target structure.  */
@@ -622,7 +634,7 @@ void mapip2_asm_output_addr_vec_elt(FILE* stream, int value)
 /* Return the difference, in bytes, between FP and SP, as it would be after the prologue. */
 int mapip2_initial_frame_pointer_offset(void)
 {
-	long framesize = (frame_info.valid	?
+	long framesize = (frame_info.valid ?
 		frame_info.total_size :
 		compute_frame_size(get_frame_size()));
 	return framesize;
@@ -661,6 +673,9 @@ void mapip2_expand_prologue(void)
 	framesize = (frame_info.valid
 		? frame_info.total_size
 		: compute_frame_size (get_frame_size ()));
+#if 0
+	printf("prologue: %s. local: %li, total %li\n", current_function_name(), get_frame_size(), framesize);
+#endif
 
 	if (framesize > 0 || frame_pointer_needed)
 		sp = gen_rtx_REG (SImode, SP_REGNUM);
