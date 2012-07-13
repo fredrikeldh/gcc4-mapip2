@@ -197,7 +197,14 @@
 	"call %1	//%2, %0")
 
 (define_insn "return"
-	[(return)]
+	[(use (reg:SI RA_REGNUM))
+	(return)]
+	"reload_completed && !profile_flag && simple_return ()"
+	"ret")
+
+(define_insn "return_internal"
+	[(use (reg:SI RA_REGNUM))
+	(return)]
 	""
 	"ret")
 
@@ -220,16 +227,24 @@
 }")
 
 (define_insn "store_regs"
-	[(match_operand:SI 0 "register_operand" "")
-		(match_operand:SI 1 "register_operand" "")
-		(const_int 1)]
+	[(set (reg:SI SP_REGNUM)
+		(minus:SI (reg:SI SP_REGNUM)
+			(minus:SI (match_operand:SI 1 "register_operand" "")
+				(match_operand:SI 0 "register_operand" "")
+			)
+		)
+	)]
 	""
 	"push %0,%1")
 
 (define_insn "restore_regs"
-	[(match_operand:SI 0 "register_operand" "")
-		(match_operand:SI 1 "register_operand" "")
-		(const_int 2)]
+	[(set (reg:SI SP_REGNUM)
+		(plus:SI (reg:SI SP_REGNUM)
+			(minus:SI (match_operand:SI 1 "register_operand" "")
+				(match_operand:SI 0 "register_operand" "")
+			)
+		)
+	)]
 	""
 	"pop %0,%1")
 

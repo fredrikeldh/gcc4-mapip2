@@ -33,6 +33,8 @@
 
 #define SHOULD_COMBINE_STORE_RESTORE 1
 
+#define DEBUG_PROLOGUE 0
+
 static struct mapip_frame_info {
   int valid;		/* 0 values are not valid */
   int rmask;		/* mask of registers saved */
@@ -511,13 +513,16 @@ static bool TARGET_ASM_INTEGER (rtx x, unsigned int size, int aligned_p)
 #undef  TARGET_ASM_FUNCTION_EPILOGUE
 static void TARGET_ASM_FUNCTION_EPILOGUE (FILE *file ATTRIBUTE_UNUSED, HOST_WIDE_INT size ATTRIBUTE_UNUSED)
 {
-#if 0
+#if DEBUG_PROLOGUE
 	fprintf(file, "// epilogue %li\n", size);
 	printf("epilogue %li\n", size);
 #endif
 	/* because mapip2_expand_epilogue() doesn't always get called. */
 	frame_info.valid = 0;
 }
+
+#undef TARGET_PROMOTE_PROTOTYPES
+#define TARGET_PROMOTE_PROTOTYPES hook_bool_const_tree_true
 
 
 
@@ -642,23 +647,36 @@ int mapip2_initial_frame_pointer_offset(void)
 
 int mapip2_initial_elimination_offset(int from, int to)
 {
-	if(!frame_info.valid)
-	{
-		compute_frame_size(get_frame_size());
-#if 0
-		if(!frame_info.valid)
-			fancy_abort (__FILE__, __LINE__, __FUNCTION__);
-#endif
-	}
+	int framesize = (frame_info.valid ?
+		frame_info.total_size :
+		compute_frame_size (get_frame_size ()));
 
+	if (from == ARG_POINTER_REGNUM)
+	{
+		if(to == STACK_POINTER_REGNUM)
+			return framesize;
+		if (to == HARD_FRAME_POINTER_REGNUM)
+			return 0;
+	}
 	if (from == FRAME_POINTER_REGNUM)
 	{
 		if (to == STACK_POINTER_REGNUM)
 			return frame_info.outgoing + frame_info.locals;
-		else
+		if(to == HARD_FRAME_POINTER_REGNUM)
 			return -frame_info.regs;
-	} else
-		fancy_abort (__FILE__, __LINE__, __FUNCTION__);
+	}
+	if (from == RETURN_ADDRESS_POINTER_REGNUM)
+	{
+		if(to == RA_REGNUM)
+			return 0;
+		if (to == HARD_FRAME_POINTER_REGNUM)
+			return -UNITS_PER_WORD;
+		if (to == STACK_POINTER_REGNUM)
+			return framesize - UNITS_PER_WORD;
+	}
+
+	fprintf(stderr, "from %s, to %s\n", reg_names[from], reg_names[to]);
+	fancy_abort (__FILE__, __LINE__, __FUNCTION__);
 }
 
 
@@ -673,7 +691,7 @@ void mapip2_expand_prologue(void)
 	framesize = (frame_info.valid
 		? frame_info.total_size
 		: compute_frame_size (get_frame_size ()));
-#if 0
+#if DEBUG_PROLOGUE
 	printf("prologue: %s. local: %li, total %li\n", current_function_name(), get_frame_size(), framesize);
 #endif
 
@@ -686,8 +704,12 @@ void mapip2_expand_prologue(void)
 	/* Save the necessary registers */
 	if (SHOULD_COMBINE_STORE_RESTORE)
 	{
-		emit_insn (gen_store_regs (gen_rtx_REG (SImode, frame_info.first_reg),
-			gen_rtx_REG (SImode, frame_info.last_reg)));
+#if DEBUG_PROLOGUE
+		printf("push %i to %i\n", frame_info.first_reg, frame_info.last_reg);
+#endif
+		if(frame_info.first_reg && frame_info.last_reg)
+			emit_insn (gen_store_regs (gen_rtx_REG (SImode, frame_info.first_reg),
+				gen_rtx_REG (SImode, frame_info.last_reg)));
 	}
 	else
 	{
@@ -739,7 +761,7 @@ void mapip2_expand_prologue(void)
 }
 
 
-static int simple_return(void)
+int simple_return(void)
 {
 	int i;
 
@@ -755,6 +777,8 @@ static int simple_return(void)
 	}
 }
 
+#define INVALIDATE_FRAME_INFO_IN_EPILOGUE /*frame_info.valid = 0*/
+
 void mapip2_expand_epilogue(void)
 {
 	int i, j;
@@ -764,11 +788,14 @@ void mapip2_expand_epilogue(void)
 	int rmask = frame_info.rmask;
 
 	framesize = (frame_info.valid ? frame_info.total_size: compute_frame_size (get_frame_size ()));
+#if DEBUG_PROLOGUE
+	printf("pop %i to %i\n", frame_info.first_reg, frame_info.last_reg);
+#endif
 
 	if (simple_return ())
 	{
-		emit_jump_insn (gen_return());
-		frame_info.valid = 0;
+		emit_jump_insn (gen_return_internal());
+		INVALIDATE_FRAME_INFO_IN_EPILOGUE;
 		return;
 	}
 
@@ -784,8 +811,8 @@ void mapip2_expand_epilogue(void)
 
 	if (frame_info.regs == 0)
 	{
-		emit_jump_insn (gen_return());
-		frame_info.valid = 0;
+		emit_jump_insn (gen_return_internal());
+		INVALIDATE_FRAME_INFO_IN_EPILOGUE;
 		return;
 	}
 
@@ -793,12 +820,13 @@ void mapip2_expand_epilogue(void)
 
 	if (SHOULD_COMBINE_STORE_RESTORE)
 	{
-		emit_insn (gen_restore_regs (gen_rtx_REG (SImode, frame_info.first_reg),
-			gen_rtx_REG (SImode, frame_info.last_reg)));
+		if(frame_info.first_reg && frame_info.last_reg)
+			emit_insn (gen_restore_regs (gen_rtx_REG (SImode, frame_info.first_reg),
+				gen_rtx_REG (SImode, frame_info.last_reg)));
 
-		emit_jump_insn (gen_return());
+		emit_jump_insn (gen_return_internal());
 
-		frame_info.valid = 0;
+		INVALIDATE_FRAME_INFO_IN_EPILOGUE;
 		return;
 	}
 
@@ -816,9 +844,9 @@ void mapip2_expand_epilogue(void)
 				emit_insn (gen_restore_regs (gen_rtx_REG (SImode, frame_info.first_reg),
 					gen_rtx_REG (SImode, frame_info.last_reg)));
 
-				emit_jump_insn (gen_return());
+				emit_jump_insn (gen_return_internal());
 
-				frame_info.valid = 0;
+				INVALIDATE_FRAME_INFO_IN_EPILOGUE;
 				return;
 			}
 			else
@@ -833,5 +861,5 @@ void mapip2_expand_epilogue(void)
 			i--;
 	}
 
-	frame_info.valid = 0;
+	INVALIDATE_FRAME_INFO_IN_EPILOGUE;
 }

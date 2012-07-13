@@ -21,47 +21,49 @@ do \
 while (0)
 
 /* register basics */
-#define FIRST_PSEUDO_REGISTER 32
+#define FIRST_PSEUDO_REGISTER 34
 #define FIXED_REGISTERS \
 { \
-  1, 1, 1, 0, \
-  0, 0, 0, 0, 0, 0, 0, 0,	\
-  0, 0, 0, 0, \
-  0, 0, 0, 0, 0, 0, 0, 0,	\
-  0, 0, 0, 0, 0, 0, 0, 0,	\
+	1, 1, 1, 0, \
+	0, 0, 0, 0, 0, 0, 0, 0,	\
+	0, 0, 0, 0, \
+	0, 0, 0, 0, 0, 0, 0, 0,	\
+	0, 0, 0, 0, 0, 0, 0, 0,	\
+	1, 1, \
 }
 #define CALL_USED_REGISTERS	\
 { \
-  1, 1, 1, 0, \
-  0, 0, 0, 0, 0, 0, 0, 0,	\
-  1, 1, 1, 1, \
-  1, 1, 1, 1, 1, 1, 1, 1,	\
-  1, 1, 1, 1, 1, 1, 1, 1,	\
+	1, 1, 1, 0, \
+	0, 0, 0, 0, 0, 0, 0, 0,	\
+	1, 1, 1, 1, \
+	1, 1, 1, 1, 1, 1, 1, 1,	\
+	1, 1, 1, 1, 1, 1, 1, 1,	\
+	1, 1, \
 }
 
 /* register classes */
 enum reg_class
 {
-  NO_REGS,
-  SP_REGS, /* stack pointer */
-  GENERAL_REGS,
-  ALL_REGS,
-  LIM_REG_CLASSES
+	NO_REGS,
+	SP_REGS, /* stack pointer */
+	GENERAL_REGS,
+	ALL_REGS,
+	LIM_REG_CLASSES
 };
 #define REG_CLASS_NAMES	\
 { \
-  "NO_REGS",\
-  "SP_REGS",\
-  "GENERAL_REGS",\
-  "ALL_REGS",\
+	"NO_REGS",\
+	"SP_REGS",\
+	"GENERAL_REGS",\
+	"ALL_REGS",\
 }
 
 #define REG_CLASS_CONTENTS \
 { \
-  {0x00000000},\
-  {0x00000002},\
-  {0xFFFFFFFF},\
-  {0xFFFFFFFF},\
+	{0x00000000, 0x0},\
+	{0x00000002, 0x0},\
+	{0xFFFFFFFF, 0x3},\
+	{0xFFFFFFFF, 0x3},\
 }
 
 #define N_REG_CLASSES ((int) LIM_REG_CLASSES)
@@ -69,7 +71,7 @@ enum reg_class
 #define REGNO_OK_FOR_BASE_P(num) ((num) < FIRST_PSEUDO_REGISTER)
 #define REGNO_REG_CLASS(num)	(((num) < FIRST_PSEUDO_REGISTER) ? GENERAL_REGS : NO_REGS)
 #define CLASS_MAX_NREGS(CLASS, MODE)\
-  ((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
+	((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
 #define REGNO_OK_FOR_INDEX_P(num) 0
 #define INDEX_REG_CLASS NO_REGS
 
@@ -134,19 +136,29 @@ do { \
 #define STACK_POINTER_REGNUM SP_REGNUM
 #define HARD_FRAME_POINTER_REGNUM FP_REGNUM
 #define FRAME_POINTER_REGNUM 0
-#define RETURN_ADDRESS_POINTER_REGNUM RA_REGNUM
-#define ARG_POINTER_REGNUM FP_REGNUM
+/* these two are peudo registers, so that they can be eliminated
+   in -fomit-frame-pointer mode. */
+#define RETURN_ADDRESS_POINTER_REGNUM RAP_REGNUM
+#define ARG_POINTER_REGNUM ARG_REGNUM
 /* g13 is the least likely to be used temporary register, so we
    use it for the static chain */
 #define STATIC_CHAIN_REGNUM (G0_REGNUM+13)
 
 /* elimination */
 #define ELIMINABLE_REGS {\
+	{ ARG_POINTER_REGNUM, STACK_POINTER_REGNUM },\
+	{ ARG_POINTER_REGNUM, HARD_FRAME_POINTER_REGNUM },\
 	{ FRAME_POINTER_REGNUM, STACK_POINTER_REGNUM },\
 	{ FRAME_POINTER_REGNUM, HARD_FRAME_POINTER_REGNUM },\
+	{ RETURN_ADDRESS_POINTER_REGNUM, RA_REGNUM },\
+	{ RETURN_ADDRESS_POINTER_REGNUM, STACK_POINTER_REGNUM },\
+	{ RETURN_ADDRESS_POINTER_REGNUM, HARD_FRAME_POINTER_REGNUM },\
 }
-#define INITIAL_FRAME_POINTER_OFFSET(depth) (depth) = mapip2_initial_frame_pointer_offset()
+
+#define INITIAL_FRAME_POINTER_OFFSET(depth) \
+	(depth) = mapip2_initial_frame_pointer_offset()
 int mapip2_initial_frame_pointer_offset(void);
+
 #define INITIAL_ELIMINATION_OFFSET(from, to, offset) \
 	offset = mapip2_initial_elimination_offset(from, to)
 int mapip2_initial_elimination_offset(int from, int to);
@@ -223,6 +235,7 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 "p0", "p1",  "p2",  "p3", "g0", "g1", "g2", "g3",\
 "g4", "g5",  "g6",  "g7", "g8", "g9", "g10","g11",\
 "g12","g13", "r0",  "r1",\
+"rap", "arg",\
 }
 
 
@@ -271,5 +284,6 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 void mapip2_expand_call (rtx* operands, int returns_value);
 void mapip2_expand_prologue(void);
 void mapip2_expand_epilogue(void);
+int simple_return(void);
 
 #endif	/*MAPIP2_H*/
