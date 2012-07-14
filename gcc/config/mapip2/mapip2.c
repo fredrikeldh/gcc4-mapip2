@@ -103,7 +103,7 @@ static int compute_frame_size(int locals)
 		}
 	}
 
-	if (SHOULD_COMBINE_STORE_RESTORE)
+	if (SHOULD_COMBINE_STORE_RESTORE && last && first)
 		regs = UNITS_PER_WORD * (1 + last - first);
 
 	/* Compute total size of stack frame */
