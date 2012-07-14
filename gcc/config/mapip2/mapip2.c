@@ -383,7 +383,7 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 			REAL_VALUE_FROM_CONST_DOUBLE (d.r, x);
 			REAL_VALUE_TO_TARGET_SINGLE (d.r, f.l);
 			fprintf (file, HOST_WIDE_INT_PRINT_HEX, f.l);
-			fprintf(file, "\t\t// %.12g f(%.6g)", d.d, f.f);
+			fprintf(file, "\t\t// d(%.12g) f(%.6g)", d.d, f.f);
 			return;
 		}
 
@@ -474,9 +474,9 @@ static void TARGET_PRINT_OPERAND_ADDRESS(FILE *file, rtx addr)
 
 	case LABEL_REF:
 	case SYMBOL_REF:
-	case CONST_INT:
 	case CONST:
 		fputc('&', file);
+	case CONST_INT:
 		output_addr_const (file, addr);
 		break;
 
