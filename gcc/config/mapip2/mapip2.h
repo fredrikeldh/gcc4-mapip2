@@ -21,15 +21,21 @@ do \
 while (0)
 
 /* register basics */
-#define FIRST_PSEUDO_REGISTER 34
+#define FIRST_PSEUDO_REGISTER (32 + 16 + 2)
+#define FIRST_FLOAT_REGISTER (32)
+#define FLOAT_REGISTER_COUNT (16)
+#define FIRST_FAKE_REGISTER (FIRST_FLOAT_REGISTER + FLOAT_REGISTER_COUNT)
+
 #define FIXED_REGISTERS \
 { \
-	1, 1, 1, 0, \
-	0, 0, 0, 0, 0, 0, 0, 0,	\
-	0, 0, 0, 0, \
-	0, 0, 0, 0, 0, 0, 0, 0,	\
-	0, 0, 0, 0, 0, 0, 0, 0,	\
-	1, 1, \
+	1, 1, 1, 0, /*special*/\
+	0, 0, 0, 0, 0, 0, 0, 0, /*saved*/	\
+	0, 0, 0, 0, /*parameters*/\
+	0, 0, 0, 0, 0, 0, 0, 0, /*general*/	\
+	0, 0, 0, 0, 0, 0, 0, 0, /*general*/	\
+	0, 0, 0, 0, 0, 0, 0, 0, /*float*/	\
+	0, 0, 0, 0, 0, 0, 0, 0, /*float*/	\
+	1, 1, /*fake*/ \
 }
 #define CALL_USED_REGISTERS	\
 { \
@@ -38,6 +44,8 @@ while (0)
 	1, 1, 1, 1, \
 	1, 1, 1, 1, 1, 1, 1, 1,	\
 	1, 1, 1, 1, 1, 1, 1, 1,	\
+	0, 0, 0, 0, 0, 0, 0, 0,	/* saved float */ \
+	1, 1, 1, 1, 1, 1, 1, 1,	/* unsaved float */ \
 	1, 1, \
 }
 
@@ -47,6 +55,7 @@ enum reg_class
 	NO_REGS,
 	SP_REGS, /* stack pointer */
 	GENERAL_REGS,
+	FLOAT_REGS,
 	ALL_REGS,
 	LIM_REG_CLASSES
 };
@@ -55,6 +64,7 @@ enum reg_class
 	"NO_REGS",\
 	"SP_REGS",\
 	"GENERAL_REGS",\
+	"FLOAT_REGS",\
 	"ALL_REGS",\
 }
 
@@ -62,18 +72,25 @@ enum reg_class
 { \
 	{0x00000000, 0x0},\
 	{0x00000002, 0x0},\
-	{0xFFFFFFFF, 0x3},\
-	{0xFFFFFFFF, 0x3},\
+	{0xFFFFFFFF, 0x30000},\
+	{0x00000000, 0x0FFFF},\
+	{0xFFFFFFFF, 0x3FFFF},\
 }
 
 #define N_REG_CLASSES ((int) LIM_REG_CLASSES)
 #define BASE_REG_CLASS GENERAL_REGS
-#define REGNO_OK_FOR_BASE_P(num) ((num) < FIRST_PSEUDO_REGISTER)
-#define REGNO_REG_CLASS(num)	(((num) < FIRST_PSEUDO_REGISTER) ? GENERAL_REGS : NO_REGS)
-#define CLASS_MAX_NREGS(CLASS, MODE)\
-	((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD)
+#define REGNO_OK_FOR_BASE_P(num) mapip2_regno_ok_for_base_p(num)
+int mapip2_regno_ok_for_base_p(unsigned regnum);
+#define REGNO_REG_CLASS(num) mapip2_regno_reg_class(num)
+enum reg_class mapip2_regno_reg_class(unsigned regnum);
+#define CLASS_MAX_NREGS(CLASS, MODE) mapip2_class_max_nregs(CLASS, MODE)
+int mapip2_class_max_nregs(int CLASS, int MODE);
 #define REGNO_OK_FOR_INDEX_P(num) 0
 #define INDEX_REG_CLASS NO_REGS
+
+/* custom */
+#define INT_REGNO_P(num) ((num) < FR0_REGNUM || (num) >= FIRST_FAKE_REGNUM)
+#define FLOAT_REGNO_P(num) ((num) >= FR0_REGNUM && (num) <= FR15_REGNUM)
 
 /* storage layout */
 #define BITS_PER_UNIT 8
@@ -136,7 +153,7 @@ do { \
 #define STACK_POINTER_REGNUM SP_REGNUM
 #define HARD_FRAME_POINTER_REGNUM FP_REGNUM
 #define FRAME_POINTER_REGNUM 0
-/* these two are peudo registers, so that they can be eliminated
+/* these two are fake registers, so that FP can be eliminated
    in -fomit-frame-pointer mode. */
 #define RETURN_ADDRESS_POINTER_REGNUM RAP_REGNUM
 #define ARG_POINTER_REGNUM ARG_REGNUM
@@ -167,19 +184,28 @@ int mapip2_initial_elimination_offset(int from, int to);
 #define EH_RETURN_DATA_REGNO(N) ((N) < 2 ? (N) + G0_REGNUM : INVALID_REGNUM)
 
 /* register arguments */
-#define FUNCTION_ARG_REGNO_P(regno) ((regno) >= P0_REGNUM && (regno) <= P3_REGNUM)
-typedef int CUMULATIVE_ARGS;
+#define FUNCTION_ARG_REGNO_P(regno) mapip2_function_arg_regno_p(regno)
+int mapip2_function_arg_regno_p(int regno);
+
+typedef struct CUMULATIVE_ARGS {
+	unsigned i;	/* int registers used */
+	unsigned f;	/* float registers used */
+	unsigned s;	/* stack words used */
+} CUMULATIVE_ARGS;
+
 #define INIT_CUMULATIVE_ARGS(CUM, FNTYPE, LIBNAME, FNDECL, N_NAMED_ARGS) \
-	(CUM) = 0
+	mapip2_init_cumulative_args(&(CUM));
+void mapip2_init_cumulative_args(CUMULATIVE_ARGS*);
 
 /* values in registers */
-#define HARD_REGNO_MODE_OK(REGNO, MODE) 1
-#define MODES_TIEABLE_P(MODE1, MODE2)	\
-	(GET_MODE_CLASS (MODE1) == GET_MODE_CLASS (MODE2) \
-	|| GET_MODE_SIZE (MODE1) == GET_MODE_SIZE (MODE2))
-#define HARD_REGNO_NREGS(REGNO, MODE) \
-	((GET_MODE_SIZE (MODE) + UNITS_PER_WORD - 1) \
-	/ UNITS_PER_WORD)
+#define HARD_REGNO_MODE_OK(regno, mode) mapip2_hard_regno_mode_ok(regno, mode)
+int mapip2_hard_regno_mode_ok(int regno, int mode);
+
+#define MODES_TIEABLE_P(mode1, mode2)	mapip2_modes_tieable_p(mode1, mode2)
+int mapip2_modes_tieable_p(int mode1, int mode2);
+
+#define HARD_REGNO_NREGS(regno, mode) mapip2_hard_regno_nregs(regno, mode);
+int mapip2_hard_regno_nregs(int regno, int mode);
 
 /* trampolines */
 #define TRAMPOLINE_SIZE 4
@@ -235,6 +261,8 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 "p0", "p1",  "p2",  "p3", "g0", "g1", "g2", "g3",\
 "g4", "g5",  "g6",  "g7", "g8", "g9", "g10","g11",\
 "g12","g13", "r0",  "r1",\
+"f0", "f1",  "f2",  "f3", "f4", "f5", "f6", "f7",\
+"f8", "f9",  "f10", "f11","f12","f13","f14","f15",\
 "rap", "arg",\
 }
 
@@ -250,12 +278,6 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 #define ASM_COMMENT_START "//"
 #define ASM_APP_ON "//APP"
 #define ASM_APP_OFF "//NO_APP"
-
-/* old constraints */
-#define CONST_DOUBLE_OK_FOR_LETTER_P(value, c) 0
-#define CONST_OK_FOR_CONSTRAINT_P(value, c, str) 0
-#define REG_CLASS_FROM_LETTER(c) NO_REGS
-#define EXTRA_ADDRESS_CONSTRAINT(c, str) 0
 
 /* debugging info */
 #if 0

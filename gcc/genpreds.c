@@ -1127,7 +1127,7 @@ write_constraint_satisfied_p (void)
   struct constraint_data *c;
 
   puts ("bool\n"
-	"constraint_satisfied_p (rtx op, enum constraint_num c)\n"
+	"constraint_satisfied_p (rtx op ATTRIBUTE_UNUSED, enum constraint_num c)\n"
 	"{\n"
 	"  switch (c)\n"
 	"    {");

@@ -1,19 +1,3 @@
-(define_predicate "call_operand"
-  (match_code "mem")
-{
-  return (GET_CODE (op) == MEM
-	  && (GET_CODE (XEXP (op, 0)) == SYMBOL_REF
-			|| GET_CODE (XEXP (op, 0)) == REG));
-})
-
-(define_predicate "const0_operand"
-	(and (match_code "const_int")
-	(match_test "op == CONST0_RTX (mode)")))
-
-(define_predicate "reg_or_0_operand"
-	(ior (match_operand 0 "register_operand")
-	(match_operand 0 "const0_operand")))
-
 (define_constants
 	[(ZERO_REGNUM 0)
 	(SP_REGNUM		1)
@@ -48,10 +32,52 @@
 	(G13_REGNUM		29)
 	(R0_REGNUM		30)
 	(R1_REGNUM		31)
-	(LAST_HARD_REGNUM	31)
-	(RAP_REGNUM		32)
-	(ARG_REGNUM		33)
-	(CC_REGNUM		34)])
+	(FR0_REGNUM   32)
+	(FR8_REGNUM   40)
+	(FR15_REGNUM  47)
+	(LAST_HARD_REGNUM	47)
+	(FIRST_FAKE_REGNUM 48)
+	(RAP_REGNUM		48)
+	(ARG_REGNUM		49)
+	(CC_REGNUM		50)])
+
+
+(define_predicate "call_operand"
+  (match_code "mem")
+{
+  return (GET_CODE (op) == MEM
+	  && (GET_CODE (XEXP (op, 0)) == SYMBOL_REF
+			|| GET_CODE (XEXP (op, 0)) == REG));
+})
+
+(define_predicate "const0_operand"
+	(and (match_code "const_int")
+	(match_test "op == CONST0_RTX (mode)")))
+
+(define_predicate "reg_or_0_operand"
+	(ior (match_operand 0 "register_operand")
+	(match_operand 0 "const0_operand")))
+
+(define_predicate "int_register_operand"
+	(match_operand 0 "register_operand")
+{
+ unsigned int regno = REGNO(op);
+ return INT_REGNO_P(regno);
+})
+
+(define_predicate "float_register_operand"
+	(match_operand 0 "register_operand")
+{
+ unsigned int regno = REGNO(op);
+ return FLOAT_REGNO_P(regno);
+})
+
+(define_register_constraint "f" "FLOAT_REGS"
+	"Mapip2 float registers")
+
+(define_register_constraint "A" "ALL_REGS"
+	"Mapip2 all registers")
+
 
 ; put this first so movsi doesn't get insn_code 0, which appears to trigger an internal gcc bug.
 (define_insn "nop"
@@ -90,24 +116,117 @@
 	ld.b [%0],%z1")
 
 (define_insn "movsf"
-	[(set (match_operand:SF 0 "nonimmediate_operand" "=r,r,r,m")
-		(match_operand:SF 1 "general_operand" "r,i,m,r"))]
+	[(set (match_operand:SF 0 "nonimmediate_operand" "=A,A,A,m")
+		(match_operand:SF 1 "general_operand" "A,F,m,A"))]
 	""
 	"@
-	ld %0,%z1
-	ld %0,%z1
-	ld %0,[%1]
-	ld [%0],%z1")
+	ld.s %0,%z1
+	ld.s %0,%z1
+	ld.s %0,[%1]
+	ld.s [%0],%z1")
 
-;(define_insn "movdf"
-;	[(set (match_operand:DF 0 "nonimmediate_operand" "=r,r,r,m")
-;		(match_operand:DF 1 "general_operand" "r,i,m,r"))]
-;	""
-;	"@
-;	ld.d %0,%z1
-;	ld.d %0,%z1
-;	ld.d %0,[%1]
-;	ld.d [%0],%z1")
+(define_insn "movdf"
+	[(set (match_operand:DF 0 "nonimmediate_operand" "=A,A,A,m")
+		(match_operand:DF 1 "general_operand" "A,F,m,A"))]
+	""
+	"@
+	ld.d %0,%z1
+	ld.d %0,%z1
+	ld.d %0,[%1]
+	ld.d [%0],%z1")
+
+(define_insn "floatsidf2"
+	[(set (match_operand:DF 0 "float_register_operand" "=r")
+		(float:DF (match_operand:SI 1 "register_operand" "r")))]
+	""
+	"float.s %0,%z1")
+
+(define_insn "floatdidf2"
+	[(set (match_operand:DF 0 "float_register_operand" "=r")
+		(float:DF (match_operand:DI 1 "register_operand" "r")))]
+	""
+	"float.d %0,%z1")
+
+(define_insn "floatunsidf2"
+	[(set (match_operand:DF 0 "float_register_operand" "=r")
+		(unsigned_float:DF (match_operand:SI 1 "float_register_operand" "r")))]
+	""
+	"floatun.s %0,%z1")
+
+(define_insn "floatundidf2"
+	[(set (match_operand:DF 0 "float_register_operand" "=r")
+		(unsigned_float:DF (match_operand:DI 1 "float_register_operand" "r")))]
+	""
+	"floatun.d %0,%z1")
+
+
+(define_insn "fix_truncsidf2"
+	[(set (match_operand:SI 0 "register_operand" "=r")
+		(fix:SI (match_operand:DF 1 "float_register_operand" "r")))]
+	""
+	"fix_trunc.s %0,%1")
+
+(define_insn "fix_truncdidf2"
+	[(set (match_operand:DI 0 "register_operand" "=r")
+		(fix:DI (match_operand:DF 1 "float_register_operand" "r")))]
+	""
+	"fix_trunc.d %0,%1")
+
+(define_insn "fixuns_truncsidf2"
+	[(set (match_operand:SI 0 "register_operand" "=r")
+		(unsigned_fix:SI (match_operand:DF 1 "float_register_operand" "r")))]
+	""
+	"fixun_trunc.s %0,%1")
+
+(define_insn "fixuns_truncdidf2"
+	[(set (match_operand:DI 0 "register_operand" "=r")
+		(unsigned_fix:DI (match_operand:DF 1 "float_register_operand" "r")))]
+	""
+	"fixun_trunc.d %0,%1")
+
+(define_insn "sqrtdf2"
+	[(set (match_operand:DF 0 "float_register_operand" "=r")
+		(sqrt:DF (match_operand:DF 1 "float_register_operand" "r")))]
+	""
+	"fsqrt %0,%1")
+
+(define_insn "sindf2"
+	[(set (match_operand:DF 0 "float_register_operand" "=r")
+		(unspec:DF [(match_operand:DF 1 "float_register_operand" "r")] 1))]
+	""
+	"fsin %0,%1")
+
+(define_insn "cosdf2"
+	[(set (match_operand:DF 0 "float_register_operand" "=r")
+		(unspec:DF [(match_operand:DF 1 "float_register_operand" "r")] 2))]
+	""
+	"fcos %0,%1")
+
+(define_insn "expdf2"
+	[(set (match_operand:DF 0 "float_register_operand" "=r")
+		(unspec:DF [(match_operand:DF 1 "float_register_operand" "r")] 3))]
+	""
+	"fexp %0,%1")
+
+(define_insn "logdf2"
+	[(set (match_operand:DF 0 "float_register_operand" "=r")
+		(unspec:DF [(match_operand:DF 1 "float_register_operand" "r")] 4))]
+	""
+	"flog %0,%1")
+
+(define_insn "powdf3"
+	[(set (match_operand:DF 0 "float_register_operand" "=r")
+		(unspec:DF [(match_operand:DF 1 "float_register_operand" "r")
+		(match_operand:DF 2 "float_register_operand" "r")] 5))]
+	""
+	"fpow %0,%2")
+
+(define_insn "atan2df3"
+	[(set (match_operand:DF 0 "float_register_operand" "=r")
+		(unspec:DF [(match_operand:DF 1 "float_register_operand" "r")
+		(match_operand:DF 2 "float_register_operand" "r")] 6))]
+	""
+	"fatan2 %0,%2")
 
 
 (define_insn "zero_extendqisi2"
@@ -189,7 +308,7 @@
 	"call %0	//%1")
 
 (define_insn "call_value"
-	[(set (match_operand 0 "" "=g")
+	[(set (match_operand 0 "" "=A")
 		(call (match_operand:SI 1 "memory_operand" "m")
 			(match_operand:SI 2 "general_operand" "g")))
 	(clobber (reg:SI RA_REGNUM))]

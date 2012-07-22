@@ -932,6 +932,10 @@ see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
                    CONST_DOUBLE_OK_FOR_LETTER_P EXTRA_CONSTRAINT
 #endif
 
+#ifndef CONST_OK_FOR_CONSTRAINT_P
+#define CONST_OK_FOR_CONSTRAINT_P(VAL,C,STR) 0
+#endif
+
 #else /* old constraint mechanism in use */
 
 /* Determine whether extra constraint letter should be handled

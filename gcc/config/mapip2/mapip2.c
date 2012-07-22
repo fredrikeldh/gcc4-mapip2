@@ -133,19 +133,90 @@ static int compute_frame_size(int locals)
 	return frame_info.total_size;
 }
 
+int mapip2_regno_ok_for_base_p(unsigned regnum)
+{
+	return INT_REGNO_P(regnum) && regnum < FIRST_PSEUDO_REGISTER;
+}
+
+enum reg_class mapip2_regno_reg_class(unsigned regnum)
+{
+	if(regnum < FIRST_FLOAT_REGISTER)
+		return GENERAL_REGS;
+	if(regnum < FIRST_FAKE_REGISTER)
+		return FLOAT_REGS;
+	if(regnum < FIRST_PSEUDO_REGISTER)
+		return GENERAL_REGS;
+	return NO_REGS;
+}
+
+int mapip2_function_arg_regno_p(int regno)
+{
+	if(regno >= P0_REGNUM && regno <= P3_REGNUM)
+		return 1;
+	if(regno >= FR8_REGNUM && regno <= FR15_REGNUM)
+		return 1;
+	return 0;
+}
+
+int mapip2_hard_regno_mode_ok(int regno, int mode)
+{
+	if(FLOAT_REGNO_P(regno))
+		return GET_MODE_CLASS(mode) == MODE_FLOAT;
+	else if(regno >= P0_REGNUM && regno <= P3_REGNUM)
+		return GET_MODE_CLASS(mode) != MODE_FLOAT;
+	else
+		return 1;
+}
+
+int mapip2_modes_tieable_p(int mode1, int mode2)
+{
+	/* todo: make single and double floats tiable? */
+	return (GET_MODE_CLASS(mode1) == GET_MODE_CLASS(mode2) ||
+		GET_MODE_SIZE(mode1) == GET_MODE_SIZE(mode2));
+}
+
+int mapip2_hard_regno_nregs(int regno, int mode)
+{
+	/* integer */
+	if(regno <= R1_REGNUM || regno >= RAP_REGNUM)
+		return ((GET_MODE_SIZE(mode) + UNITS_PER_WORD - 1) / UNITS_PER_WORD);
+	/* float */
+#if 0
+	enum mode_class c = GET_MODE_CLASS(mode);
+	if(c != MODE_FLOAT && mode != MODE_RANDOM)
+	{
+		fprintf(stderr, "Unsupported mode for float register %i: %s\n", regno, GET_MODE_NAME(mode));
+		gcc_assert(false);
+	}
+	return 1;
+#endif
+#define UNITS_PER_FPREG 8
+	return (GET_MODE_SIZE (mode) + UNITS_PER_FPREG - 1) / UNITS_PER_FPREG;
+}
+
+int mapip2_class_max_nregs(int CLASS, int MODE)
+{
+	/* float */
+	if(CLASS == FLOAT_REGS)
+		return (GET_MODE_SIZE (MODE) + UNITS_PER_FPREG - 1) / UNITS_PER_FPREG;
+	else	/* integer */
+		return ((GET_MODE_SIZE(MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD);
+}
+
+
 /***********************************
 *  Test if a reg can be used as a
 *		  base register
 ***********************************/
 
-static int mapip_reg_ok_for_base_p(rtx x, int strict)
+static int mapip2_reg_ok_for_base_p(rtx x, int strict)
 {
 	if (GET_MODE (x) == QImode || GET_MODE (x) == HImode)
 		return 0;
 
-	return (strict
-		? REGNO_OK_FOR_BASE_P (REGNO (x))
-		: (REGNO (x) < FIRST_PSEUDO_REGISTER || REGNO (x) >= FIRST_PSEUDO_REGISTER));
+	return (strict ?
+		REGNO_OK_FOR_BASE_P (REGNO (x)) :
+		INT_REGNO_P(REGNO(x)));
 }
 
 /*
@@ -162,7 +233,7 @@ static bool TARGET_LEGITIMATE_ADDRESS_P(enum machine_mode mode ATTRIBUTE_UNUSED,
 	while (GET_CODE (x) == SUBREG)
 		x = SUBREG_REG (x);
 
-	if (GET_CODE (x) == REG && mapip_reg_ok_for_base_p (x, strict))
+	if (GET_CODE (x) == REG && mapip2_reg_ok_for_base_p (x, strict))
 		return 1;
 
 	valid = 0;
@@ -185,7 +256,7 @@ static bool TARGET_LEGITIMATE_ADDRESS_P(enum machine_mode mode ATTRIBUTE_UNUSED,
 		c1 = GET_CODE (x1);
 
 		if (c0 == REG
-			&& mapip_reg_ok_for_base_p (x0, strict))
+			&& mapip2_reg_ok_for_base_p (x0, strict))
 		{
 			if (c1 == CONST_INT || CONSTANT_ADDRESS_P (x1))
 				valid = 1;
@@ -208,6 +279,8 @@ static rtx TARGET_FUNCTION_VALUE (const_tree type,
 	const_tree fn_decl_or_type ATTRIBUTE_UNUSED, bool outgoing ATTRIBUTE_UNUSED)
 {
 	enum machine_mode mode = TYPE_MODE(type);
+	if(GET_MODE_CLASS(mode) == MODE_FLOAT)
+		return gen_rtx_REG(mode, FR8_REGNUM);
 	if(GET_MODE_SIZE(mode) < 4)
 		mode = SImode;
 	return gen_rtx_REG(mode, R0_REGNUM);
@@ -216,36 +289,55 @@ static rtx TARGET_FUNCTION_VALUE (const_tree type,
 #undef TARGET_FUNCTION_VALUE_REGNO_P
 static bool TARGET_FUNCTION_VALUE_REGNO_P (const unsigned int regno)
 {
-	return regno == R0_REGNUM;
+	return regno == R0_REGNUM || regno == FR8_REGNUM;
 }
 
 #define FUNCTION_ARG_SIZE(MODE, TYPE) \
 	((MODE) != BLKmode ? GET_MODE_SIZE (MODE) \
 	: (unsigned) int_size_in_bytes (TYPE))
 
-#undef TARGET_FUNCTION_ARG_ADVANCE
-static void TARGET_FUNCTION_ARG_ADVANCE (CUMULATIVE_ARGS *ca ATTRIBUTE_UNUSED,
-	enum machine_mode mode ATTRIBUTE_UNUSED,
-	const_tree type ATTRIBUTE_UNUSED,
-	bool named ATTRIBUTE_UNUSED)
+void mapip2_init_cumulative_args(CUMULATIVE_ARGS* c)
 {
-	*ca += (3 + FUNCTION_ARG_SIZE (mode, type)) / 4;
+	c->i = c->f = c->s = 0;
 }
 
-static const int MAX_ARGS_IN_REGS = 4;
+static const unsigned MAX_INT_ARGS_IN_REGS = 4;
+static const unsigned MAX_FLOAT_ARGS_IN_REGS = 8;
+
+#undef TARGET_FUNCTION_ARG_ADVANCE
+static void TARGET_FUNCTION_ARG_ADVANCE (CUMULATIVE_ARGS *ca ATTRIBUTE_UNUSED,
+	enum machine_mode mode,
+	const_tree type,
+	bool named ATTRIBUTE_UNUSED)
+{
+	unsigned words = (3 + FUNCTION_ARG_SIZE (mode, type)) / 4;
+	if(mode == DFmode || mode == SFmode)
+	{
+		if (ca->f < MAX_FLOAT_ARGS_IN_REGS)
+		{
+			ca->f++;
+			return;
+		}
+	} else {
+		if(ca->i + words <= MAX_INT_ARGS_IN_REGS)
+		{
+			ca->i += words;
+			return;
+		}
+	}
+	ca->s += words;
+}
 
 #undef TARGET_FUNCTION_ARG
 static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
 	enum machine_mode mode,
-	const_tree type ATTRIBUTE_UNUSED,
-	bool named ATTRIBUTE_UNUSED)
+	const_tree type,
+	bool named)
 {
 	rtx x;
-	int words;
+	unsigned words;
 
-	words = *ca;
-
-	if (words > MAX_ARGS_IN_REGS || named == 0)
+	if(named == 0)
 		return 0;
 
 	if (type)
@@ -254,6 +346,18 @@ static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
 		PROMOTE_MODE (mode, unsignedp, type);
 	}
 
+	if(mode == DFmode || mode == SFmode)
+	{
+		if (ca->f >= MAX_FLOAT_ARGS_IN_REGS)
+			return 0;
+		return gen_rtx_REG (mode, FR8_REGNUM + ca->f);
+	}
+
+	words = ca->i;
+
+	if (words >= MAX_INT_ARGS_IN_REGS)
+		return 0;
+
 	switch (mode)
 	{
 	default:
@@ -261,13 +365,11 @@ static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
 		words += ((int_size_in_bytes (type) + UNITS_PER_WORD - 1) / UNITS_PER_WORD);
 		break;
 
-	case DFmode:
 	case DImode:
 		words += 2;
 		break;
 
 	case VOIDmode:
-	case SFmode:
 	case QImode:
 	case HImode:
 	case SImode:
@@ -275,10 +377,10 @@ static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
 		break;
 	}
 
-	if (words > MAX_ARGS_IN_REGS)
+	if (words > MAX_INT_ARGS_IN_REGS)
 		return 0;
 
-	x = gen_rtx_REG (mode, P0_REGNUM + *ca);
+	x = gen_rtx_REG (mode, P0_REGNUM + ca->i);
 
 	if (x == 0)
 		abort ();
@@ -289,6 +391,8 @@ static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
 #undef TARGET_LIBCALL_VALUE
 static rtx TARGET_LIBCALL_VALUE (enum machine_mode mode, const_rtx fun ATTRIBUTE_UNUSED)
 {
+	if(GET_MODE_CLASS(mode) == MODE_FLOAT)
+		return gen_rtx_REG(mode, FR8_REGNUM);
 	return gen_rtx_REG (mode, R0_REGNUM);
 }
 
