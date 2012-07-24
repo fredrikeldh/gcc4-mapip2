@@ -490,6 +490,20 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 			fprintf(file, "\t\t// d(%.12g) f(%.6g)", d.d, f.f);
 			return;
 		}
+		if (GET_MODE(x) == DFmode)
+		{
+			union {
+				REAL_VALUE_TYPE r;
+				double d;
+				HOST_WIDE_INT ll;
+			} d;
+
+			fputc('#', file);
+			REAL_VALUE_FROM_CONST_DOUBLE (d.r, x);
+			fprintf (file, HOST_WIDE_INT_PRINT_HEX, d.ll);
+			fprintf(file, "\t\t// d(%.12g)", d.d);
+			return;
+		}
 
 	/* !! End */
 
@@ -500,12 +514,24 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 			return;
 		}
 
+		/* unused */
+		if(code == CONST_INT && GET_MODE(x) == DImode)
+		{
+			HOST_WIDE_INT hwi = INTVAL (x);
+			fputc('#', file);
+			fprintf (file, HOST_WIDE_INT_PRINT_HEX, hwi);
+			fputs("\t\t// DImode", file);
+			return;
+		}
+
 		fputc('#', file);
 		i = (int)INTVAL (x);
 		if(i >= 0 || i < -256)
 			fprintf (file, "0x%x", i);
 		else
 			fprintf(file, "%i", i);
+		/* useless; always VOIDmode. */
+		/*fprintf(file, "\t\t// %s", GET_MODE_NAME(GET_MODE(x)));*/
 		return;
 	}
 

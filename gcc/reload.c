@@ -125,7 +125,7 @@ static inline bool
 small_register_class_p (reg_class_t rclass)
 {
   return (reg_class_size [(int) rclass] == 1
-	  || (reg_class_size [(int) rclass] >= 1 
+	  || (reg_class_size [(int) rclass] >= 1
 	      && targetm.class_likely_spilled_p (rclass)));
 }
 
@@ -707,6 +707,10 @@ find_valid_class (enum machine_mode outer ATTRIBUTE_UNUSED,
 	}
     }
 
+	if(!best_size) {
+		printf("find_valid_class(inner %s, outer %s, n %i, dest %i)\n",
+			GET_MODE_NAME(inner), GET_MODE_NAME(outer), n, dest_regno);
+	}
   gcc_assert (best_size != 0);
 
   return best_class;

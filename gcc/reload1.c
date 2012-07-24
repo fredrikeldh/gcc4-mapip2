@@ -362,9 +362,9 @@ static int first_label_num;
 static char *offsets_known_at;
 static HOST_WIDE_INT (*offsets_at)[NUM_ELIMINABLE_REGS];
 
-/* Stack of addresses where an rtx has been changed.  We can undo the 
+/* Stack of addresses where an rtx has been changed.  We can undo the
    changes by popping items off the stack and restoring the original
-   value at each location. 
+   value at each location.
 
    We use this simplistic undo capability rather than copy_rtx as copy_rtx
    will not make a deep copy of a normally sharable rtx, such as
@@ -1942,7 +1942,10 @@ find_reg (struct insn_chain *chain, int order)
 	}
     }
   if (best_reg == -1)
+  {
+    printf("find_reg (ira_conflicts_p %i, order %i)\n", ira_conflicts_p, order);
     return 0;
+  }
 
   if (dump_file)
     fprintf (dump_file, "Using reg %d for reload %d\n", best_reg, rnum);
