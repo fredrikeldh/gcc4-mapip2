@@ -58,20 +58,6 @@
 	(ior (match_operand 0 "register_operand")
 	(match_operand 0 "const0_operand")))
 
-(define_predicate "int_register_operand"
-	(match_operand 0 "register_operand")
-{
- unsigned int regno = REGNO(op);
- return INT_REGNO_P(regno);
-})
-
-(define_predicate "float_register_operand"
-	(match_operand 0 "register_operand")
-{
- unsigned int regno = REGNO(op);
- return FLOAT_REGNO_P(regno);
-})
-
 (define_register_constraint "f" "FLOAT_REGS"
 	"Mapip2 float registers")
 
@@ -136,95 +122,95 @@
 	ld.d [%0],%z1")
 
 (define_insn "floatsidf2"
-	[(set (match_operand:DF 0 "float_register_operand" "=r")
+	[(set (match_operand:DF 0 "register_operand" "=f")
 		(float:DF (match_operand:SI 1 "register_operand" "r")))]
 	""
 	"float.s %0,%z1")
 
 (define_insn "floatdidf2"
-	[(set (match_operand:DF 0 "float_register_operand" "=r")
+	[(set (match_operand:DF 0 "register_operand" "=f")
 		(float:DF (match_operand:DI 1 "register_operand" "r")))]
 	""
 	"float.d %0,%z1")
 
 (define_insn "floatunsidf2"
-	[(set (match_operand:DF 0 "float_register_operand" "=r")
-		(unsigned_float:DF (match_operand:SI 1 "float_register_operand" "r")))]
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(unsigned_float:DF (match_operand:SI 1 "register_operand" "r")))]
 	""
 	"floatun.s %0,%z1")
 
 (define_insn "floatundidf2"
-	[(set (match_operand:DF 0 "float_register_operand" "=r")
-		(unsigned_float:DF (match_operand:DI 1 "float_register_operand" "r")))]
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(unsigned_float:DF (match_operand:DI 1 "register_operand" "r")))]
 	""
 	"floatun.d %0,%z1")
 
 
 (define_insn "fix_truncsidf2"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(fix:SI (match_operand:DF 1 "float_register_operand" "r")))]
+		(fix:SI (match_operand:DF 1 "register_operand" "f")))]
 	""
 	"fix_trunc.s %0,%1")
 
 (define_insn "fix_truncdidf2"
 	[(set (match_operand:DI 0 "register_operand" "=r")
-		(fix:DI (match_operand:DF 1 "float_register_operand" "r")))]
+		(fix:DI (match_operand:DF 1 "register_operand" "f")))]
 	""
 	"fix_trunc.d %0,%1")
 
 (define_insn "fixuns_truncsidf2"
 	[(set (match_operand:SI 0 "register_operand" "=r")
-		(unsigned_fix:SI (match_operand:DF 1 "float_register_operand" "r")))]
+		(unsigned_fix:SI (match_operand:DF 1 "register_operand" "f")))]
 	""
 	"fixun_trunc.s %0,%1")
 
 (define_insn "fixuns_truncdidf2"
 	[(set (match_operand:DI 0 "register_operand" "=r")
-		(unsigned_fix:DI (match_operand:DF 1 "float_register_operand" "r")))]
+		(unsigned_fix:DI (match_operand:DF 1 "register_operand" "f")))]
 	""
 	"fixun_trunc.d %0,%1")
 
 (define_insn "sqrtdf2"
-	[(set (match_operand:DF 0 "float_register_operand" "=r")
-		(sqrt:DF (match_operand:DF 1 "float_register_operand" "r")))]
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(sqrt:DF (match_operand:DF 1 "register_operand" "f")))]
 	""
 	"fsqrt %0,%1")
 
 (define_insn "sindf2"
-	[(set (match_operand:DF 0 "float_register_operand" "=r")
-		(unspec:DF [(match_operand:DF 1 "float_register_operand" "r")] 1))]
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(unspec:DF [(match_operand:DF 1 "register_operand" "f")] 1))]
 	""
 	"fsin %0,%1")
 
 (define_insn "cosdf2"
-	[(set (match_operand:DF 0 "float_register_operand" "=r")
-		(unspec:DF [(match_operand:DF 1 "float_register_operand" "r")] 2))]
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(unspec:DF [(match_operand:DF 1 "register_operand" "f")] 2))]
 	""
 	"fcos %0,%1")
 
 (define_insn "expdf2"
-	[(set (match_operand:DF 0 "float_register_operand" "=r")
-		(unspec:DF [(match_operand:DF 1 "float_register_operand" "r")] 3))]
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(unspec:DF [(match_operand:DF 1 "register_operand" "f")] 3))]
 	""
 	"fexp %0,%1")
 
 (define_insn "logdf2"
-	[(set (match_operand:DF 0 "float_register_operand" "=r")
-		(unspec:DF [(match_operand:DF 1 "float_register_operand" "r")] 4))]
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(unspec:DF [(match_operand:DF 1 "register_operand" "f")] 4))]
 	""
 	"flog %0,%1")
 
 (define_insn "powdf3"
-	[(set (match_operand:DF 0 "float_register_operand" "=r")
-		(unspec:DF [(match_operand:DF 1 "float_register_operand" "r")
-		(match_operand:DF 2 "float_register_operand" "r")] 5))]
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(unspec:DF [(match_operand:DF 1 "register_operand" "0")
+		(match_operand:DF 2 "register_operand" "f")] 5))]
 	""
 	"fpow %0,%2")
 
 (define_insn "atan2df3"
-	[(set (match_operand:DF 0 "float_register_operand" "=r")
-		(unspec:DF [(match_operand:DF 1 "float_register_operand" "r")
-		(match_operand:DF 2 "float_register_operand" "r")] 6))]
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(unspec:DF [(match_operand:DF 1 "register_operand" "0")
+		(match_operand:DF 2 "register_operand" "f")] 6))]
 	""
 	"fatan2 %0,%2")
 
@@ -380,6 +366,37 @@
 	""
 	"not %0,%z1")
 
+
+
+(define_insn "adddf3"
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(plus:DF (match_operand:DF 1 "register_operand" "0")
+		(match_operand:DF 2 "register_operand" "f")))]
+	""
+	"fadd %0,%z2")
+
+(define_insn "subdf3"
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(minus:DF (match_operand:DF 1 "register_operand" "0")
+		(match_operand:DF 2 "register_operand" "f")))]
+	""
+	"fsub %0,%z2")
+
+;; multiply
+(define_insn "muldf3"
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(mult:DF (match_operand:DF 1 "register_operand" "0")
+		(match_operand:DF 2 "register_operand" "f")))]
+	""
+	"fmul %0,%z2")
+
+;; divide
+(define_insn "divdf3"
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(div:DF (match_operand:DF 1 "register_operand" "0")
+		(match_operand:DF 2 "general_operand" "f")))]
+	""
+	"fdiv %0,%2")
 
 
 (define_insn "addsi3"
