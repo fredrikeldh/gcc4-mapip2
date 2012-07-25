@@ -491,15 +491,20 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 		}
 		if (GET_MODE(x) == DFmode)
 		{
+			REAL_VALUE_TYPE r;
+			long i[2];
 			union {
-				REAL_VALUE_TYPE r;
 				double d;
 				HOST_WIDE_INT ll;
+				int i[2];
 			} d;
 
 			fputc('#', file);
-			REAL_VALUE_FROM_CONST_DOUBLE (d.r, x);
-			fprintf (file, HOST_WIDE_INT_PRINT_HEX, d.ll);
+			REAL_VALUE_FROM_CONST_DOUBLE (r, x);
+			REAL_VALUE_TO_TARGET_DOUBLE(r, i);
+			fprintf (file, "0x%08x%08x", (unsigned)i[1], (unsigned)i[0]);
+			d.i[0] = i[0];
+			d.i[1] = i[1];
 			fprintf(file, "\t\t// d(%.12g)", d.d);
 			return;
 		}
