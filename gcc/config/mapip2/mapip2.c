@@ -160,8 +160,9 @@ int mapip2_function_arg_regno_p(int regno)
 
 int mapip2_hard_regno_mode_ok(int regno, int mode)
 {
+	int c = GET_MODE_CLASS(mode);
 	if(FLOAT_REGNO_P(regno))
-		return GET_MODE_CLASS(mode) == MODE_FLOAT;
+		return c == MODE_FLOAT || c == MODE_COMPLEX_FLOAT;
 	else
 		return 1;
 }
