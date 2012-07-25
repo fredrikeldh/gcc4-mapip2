@@ -1536,7 +1536,7 @@ extract_bit_field_1 (rtx str_rtx, unsigned HOST_WIDE_INT bitsize,
       && check_predicate_volatile_ok (icode, 1, op0, GET_MODE (op0)))
     {
       unsigned HOST_WIDE_INT xbitpos = bitpos, xoffset = offset;
-      rtx bitsize_rtx, bitpos_rtx;
+      rtx bitsize_rtx ATTRIBUTE_UNUSED, bitpos_rtx ATTRIBUTE_UNUSED;
       rtx last = get_last_insn ();
       rtx xop0 = op0;
       rtx xtarget = target;
@@ -1932,7 +1932,7 @@ static rtx
 lshift_value (enum machine_mode mode, rtx value, int bitpos, int bitsize)
 {
   double_int val;
-  
+
   val = double_int_zext (uhwi_to_double_int (INTVAL (value)), bitsize);
   val = double_int_lshift (val, bitpos, HOST_BITS_PER_DOUBLE_INT, false);
 
