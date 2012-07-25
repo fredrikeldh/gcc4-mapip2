@@ -162,8 +162,6 @@ int mapip2_hard_regno_mode_ok(int regno, int mode)
 {
 	if(FLOAT_REGNO_P(regno))
 		return GET_MODE_CLASS(mode) == MODE_FLOAT;
-	else if(regno >= P0_REGNUM && regno <= P3_REGNUM)
-		return GET_MODE_CLASS(mode) != MODE_FLOAT;
 	else
 		return 1;
 }
