@@ -134,6 +134,18 @@
 	ld.d %0,[%1]
 	ld.d [%0],%z1")
 
+(define_insn "truncdfsf2"
+	[(set (match_operand:SF 0 "register_operand" "=A")
+		(float_truncate:SF (match_operand:DF 1 "register_operand" "f")))]
+	""
+	"ld %0,%z1")
+
+(define_insn "extendsfdf2"
+	[(set (match_operand:DF 0 "register_operand" "=f")
+		(float_extend:DF (match_operand:SF 1 "register_operand" "A")))]
+	""
+	"ld %0,%z1")
+
 (define_insn "floatsidf2"
 	[(set (match_operand:DF 0 "register_operand" "=f")
 		(float:DF (match_operand:SI 1 "register_operand" "r")))]
@@ -298,6 +310,16 @@
 		(pc)))]
 	""
 	"jc %C0 %Z1,%Z2,%3")
+
+(define_insn "cbranchdf4"
+	[(set (pc)
+		(if_then_else (match_operator 0 "ordered_comparison_operator"
+		[(match_operand:DF 1 "register_operand" "f")
+			(match_operand:DF 2 "register_operand" "f")])
+		(label_ref (match_operand 3 "" ""))
+		(pc)))]
+	""
+	"fjc %C0 %Z1,%Z2,%3")
 
 (define_insn "call"
 	[(call (match_operand:SI 0 "memory_operand" "m")
