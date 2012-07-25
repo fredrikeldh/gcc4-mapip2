@@ -112,20 +112,23 @@
 	ld.d [%0],%z1")
 
 (define_insn "movsf"
-	[(set (match_operand:SF 0 "nonimmediate_operand" "=A,A,A,m")
-		(match_operand:SF 1 "general_operand" "A,F,m,A"))]
+	[(set (match_operand:SF 0 "nonimmediate_operand" "=A,A,f,m,A,m")
+		(match_operand:SF 1 "general_operand" "A,F,m,f,m,A"))]
 	""
 	"@
 	ld %0,%z1
 	ld %0,%z1
+	ld.s %0,[%1]
+	ld.s [%0],%z1
 	ld %0,[%1]
 	ld [%0],%z1")
 
 (define_insn "movdf"
-	[(set (match_operand:DF 0 "nonimmediate_operand" "=A,A,A,m")
-		(match_operand:DF 1 "general_operand" "A,F,m,A"))]
+	[(set (match_operand:DF 0 "nonimmediate_operand" "=f,A,A,A,m")
+		(match_operand:DF 1 "general_operand" "f,A,F,m,A"))]
 	""
 	"@
+	ld %0,%z1
 	ld.d %0,%z1
 	ld.d %0,%z1
 	ld.d %0,[%1]
