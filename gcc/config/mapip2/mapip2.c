@@ -519,7 +519,12 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 		}
 
 		/* unused */
+#if 0
 		if(code == CONST_INT && GET_MODE(x) == DImode)
+#else
+		/* movdi immediate */
+		if(letter == 'D')
+#endif
 		{
 			HOST_WIDE_INT hwi = INTVAL (x);
 			fputc('#', file);

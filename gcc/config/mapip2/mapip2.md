@@ -107,7 +107,7 @@
 	""
 	"@
 	ld.d %0,%z1
-	ld.d %0,%z1
+	ld.d %0,%D1
 	ld.d %0,[%1]
 	ld.d [%0],%z1")
 
@@ -171,25 +171,25 @@
 	"floatun.d %0,%z1")
 
 
-(define_insn "fix_truncsidf2"
+(define_insn "fix_truncdfsi2"
 	[(set (match_operand:SI 0 "register_operand" "=r")
 		(fix:SI (match_operand:DF 1 "register_operand" "f")))]
 	""
 	"fix_trunc.s %0,%1")
 
-(define_insn "fix_truncdidf2"
+(define_insn "fix_truncdfdi2"
 	[(set (match_operand:DI 0 "register_operand" "=r")
 		(fix:DI (match_operand:DF 1 "register_operand" "f")))]
 	""
 	"fix_trunc.d %0,%1")
 
-(define_insn "fixuns_truncsidf2"
+(define_insn "fixuns_truncdfsi2"
 	[(set (match_operand:SI 0 "register_operand" "=r")
 		(unsigned_fix:SI (match_operand:DF 1 "register_operand" "f")))]
 	""
 	"fixun_trunc.s %0,%1")
 
-(define_insn "fixuns_truncdidf2"
+(define_insn "fixuns_truncdfdi2"
 	[(set (match_operand:DI 0 "register_operand" "=r")
 		(unsigned_fix:DI (match_operand:DF 1 "register_operand" "f")))]
 	""
