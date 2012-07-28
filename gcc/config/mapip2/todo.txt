@@ -1,14 +1,16 @@
 This list is not sorted.
 
 * Direct syscalls.
-* -fomit-frame-pointer on by default at -O2.
+* -fomit-frame-pointer on by default at -O2.	OR NOT
  * If you want to debug, pass -fno-omit-frame-pointer.
-* Smaller constants (8, 16, and 24-bit).
+* Smaller constants (8, 16, and 24-bit).	ASSEMBLER ONLY.
+* Relative jumps.	ASSEMBLER ONLY?
 * Fix emit_move_insn bug.
 * Fix builtin-bitops-1.c.
 * Fix 930622-2.c.
-* Fix longlong-to-float conversion.
-* Direct floating-point support.
- * Let's have 16 64-bit registers.
- * Allocate f15 (the last one) for return values.
- * Save half of them. Allow parameter passing in the other half.
+* Fix longlong-to-float conversion.	DONE!
+* Direct floating-point support.	DONE!
+ * Let's have 16 64-bit registers.	DONE!
+ * Allocate f8 for return values. DONE!
+ * Save half of them. Allow parameter passing in the other half.	BUGGED!
+  * Fix saving of f0 - f7.

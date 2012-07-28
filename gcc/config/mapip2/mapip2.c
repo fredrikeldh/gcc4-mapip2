@@ -35,14 +35,21 @@
 
 #define DEBUG_PROLOGUE 0
 
-static struct mapip_frame_info {
-  int valid;		/* 0 values are not valid */
+typedef struct save_info {
   int rmask;		/* mask of registers saved */
   int rblocks;		/* n of register blocks to store/restore */
   int first_reg; /* first saved register */
   int last_reg;  /* last saved register */
   int n_regs;		/* number of saved regs */
-  int regs;		/* size of saved registers area */
+  int regs;		/* size of saved registers area, in bytes */
+} save_info;
+
+static struct mapip_frame_info {
+  int valid;		/* 0 values are not valid */
+
+	save_info isave, fsave;
+
+  int regs;		/* size of saved registers area, in bytes */
   long total_size;	/* total size in bytes */
   long outgoing;	/* size of outgoing args area */
   long locals;		/* size locals area */
@@ -70,22 +77,19 @@ abort_with_insn (rtx insn, const char * reason)
 	|| (REGNO == RA_REGNUM && df_regs_ever_live_p(REGNO) && !current_function_is_leaf) \
 	/*|| (REGNO == RA_REGNUM && current_opt_level==0)*/ )
 
-static int compute_frame_size(int locals)
-{
-	int total_size;
-	int regs;
+static void compute_save_data(save_info* save, int rStart, int rEnd, int bytes_per_reg) {
 	int rmask;
 	int i;
 	int rblocks;
 	int first;
 	int last;
-
+	int regs;
 	/* Calculate saved registers */
 
 	regs = rmask = rblocks = 0;
 	first = last = 0;
 
-	for (i = RA_REGNUM; i <= LAST_SAVED_REGNUM; i++)
+	for (i = rStart; i <= rEnd; i++)
 	{
 		if (SAVE_REGISTER_P (i))
 		{
@@ -104,7 +108,25 @@ static int compute_frame_size(int locals)
 	}
 
 	if (SHOULD_COMBINE_STORE_RESTORE && last && first)
-		regs = UNITS_PER_WORD * (1 + last - first);
+		regs = bytes_per_reg * (1 + last - first);
+
+	save->rmask = rmask;
+	save->rblocks = rblocks;
+	save->n_regs = regs / bytes_per_reg;
+	save->first_reg = first;
+	save->last_reg = last;
+	save->regs = regs;
+}
+
+static int compute_frame_size(int locals)
+{
+	int total_size;
+	int regs;
+
+	compute_save_data(&frame_info.isave, RA_REGNUM, LAST_SAVED_REGNUM, UNITS_PER_WORD);
+	compute_save_data(&frame_info.fsave, FR0_REGNUM, FR7_REGNUM, UNITS_PER_WORD * 2);
+
+	regs = frame_info.isave.regs + frame_info.fsave.regs;
 
 	/* Compute total size of stack frame */
 
@@ -116,13 +138,8 @@ static int compute_frame_size(int locals)
 
 	/* Store the size of the various parts of the stack frame */
 
-	frame_info.rmask = rmask;
-	frame_info.rblocks = rblocks;
-	frame_info.regs = regs;
-	frame_info.n_regs = regs / UNITS_PER_WORD;
-	frame_info.first_reg = first;
-	frame_info.last_reg = last;
 	frame_info.outgoing = crtl->outgoing_args_size;
+	frame_info.regs = regs;
 
 	/* FIXME: ??? */
 
@@ -819,6 +836,44 @@ int mapip2_initial_elimination_offset(int from, int to)
 }
 
 
+static void save_registers(const save_info* save)
+{
+	/* Save the necessary registers */
+	if (SHOULD_COMBINE_STORE_RESTORE)
+	{
+#if DEBUG_PROLOGUE
+		printf("push %i to %i\n", save->first_reg, save->last_reg);
+#endif
+		if(save->first_reg && save->last_reg)
+			emit_insn (gen_store_regs (gen_rtx_REG (SImode, save->first_reg),
+				gen_rtx_REG (SImode, save->last_reg)));
+	}
+	else
+	{
+		int rmask = save->rmask;
+		int i,j;
+
+		for (i = 0; rmask != 0; )
+		{
+			if (rmask & 1)
+			{
+				for (j = i; rmask & 1; j++)
+					rmask >>= 1;
+
+				emit_insn (gen_store_regs (gen_rtx_REG (SImode, i),
+					gen_rtx_REG (SImode, j-1)));
+				i = j;
+			}
+			else
+			{
+				rmask >>= 1;
+				i++;
+			}
+		}
+	}
+}
+
+
 /* Emit RTL for a function prologue */
 void mapip2_expand_prologue(void)
 {
@@ -840,39 +895,8 @@ void mapip2_expand_prologue(void)
 	if (frame_pointer_needed)
 		fp = gen_rtx_REG (SImode, FP_REGNUM);
 
-	/* Save the necessary registers */
-	if (SHOULD_COMBINE_STORE_RESTORE)
-	{
-#if DEBUG_PROLOGUE
-		printf("push %i to %i\n", frame_info.first_reg, frame_info.last_reg);
-#endif
-		if(frame_info.first_reg && frame_info.last_reg)
-			emit_insn (gen_store_regs (gen_rtx_REG (SImode, frame_info.first_reg),
-				gen_rtx_REG (SImode, frame_info.last_reg)));
-	}
-	else
-	{
-		int rmask = frame_info.rmask;
-		int i,j;
-
-		for (i = 0; rmask != 0; )
-		{
-			if (rmask & 1)
-			{
-				for (j = i; rmask & 1; j++)
-					rmask >>= 1;
-
-				emit_insn (gen_store_regs (gen_rtx_REG (SImode, i),
-					gen_rtx_REG (SImode, j-1)));
-				i = j;
-			}
-			else
-			{
-				rmask >>= 1;
-				i++;
-			}
-		}
-	}
+	save_registers(&frame_info.isave);
+	save_registers(&frame_info.fsave);
 
 	adjust = framesize - frame_info.regs;
 	if (adjust != 0)
@@ -918,18 +942,58 @@ int simple_return(void)
 
 #define INVALIDATE_FRAME_INFO_IN_EPILOGUE /*frame_info.valid = 0*/
 
-void mapip2_expand_epilogue(void)
+static void restore_registers(const save_info* save)
 {
 	int i, j;
+	int rblocks = save->rblocks;
+	int rmask = save->rmask;
+
+#if DEBUG_PROLOGUE
+	printf("pop %i to %i\n", save->first_reg, save->last_reg);
+#endif
+
+	if (SHOULD_COMBINE_STORE_RESTORE)
+	{
+		if(save->first_reg && save->last_reg)
+			emit_insn (gen_restore_regs (gen_rtx_REG (SImode, save->first_reg),
+				gen_rtx_REG (SImode, save->last_reg)));
+		return;
+	}
+
+	for (i = LAST_SAVED_REGNUM; i >= 0; )
+	{
+		j = i;
+
+		while (rmask & (1 << j))
+			j--;
+
+		if (j < i)
+		{
+			if (--rblocks == 0)
+			{
+				emit_insn (gen_restore_regs (gen_rtx_REG (SImode, save->first_reg),
+					gen_rtx_REG (SImode, save->last_reg)));
+				return;
+			}
+			else
+			{
+				emit_insn (gen_restore_regs (gen_rtx_REG (SImode, j+1),
+					gen_rtx_REG (SImode, i)));
+			}
+
+			i = j;
+		}
+		else
+			i--;
+	}
+}
+
+void mapip2_expand_epilogue(void)
+{
 	long framesize;
 	long adjust;
-	int rblocks = frame_info.rblocks;
-	int rmask = frame_info.rmask;
 
 	framesize = (frame_info.valid ? frame_info.total_size: compute_frame_size (get_frame_size ()));
-#if DEBUG_PROLOGUE
-	printf("pop %i to %i\n", frame_info.first_reg, frame_info.last_reg);
-#endif
 
 	if (simple_return ())
 	{
@@ -946,59 +1010,14 @@ void mapip2_expand_epilogue(void)
 		emit_insn (gen_addsi3 (sp, sp, GEN_INT (adjust)));
 	}
 
-	/* Restore pushed registers in reverse order */
-
-	if (frame_info.regs == 0)
+	if (frame_info.regs != 0)
 	{
-		emit_jump_insn (gen_return_internal());
-		INVALIDATE_FRAME_INFO_IN_EPILOGUE;
-		return;
+		/* Restore pushed registers in reverse order */
+		restore_registers(&frame_info.fsave);
+		restore_registers(&frame_info.isave);
 	}
 
-	/* Must be a frame */
-
-	if (SHOULD_COMBINE_STORE_RESTORE)
-	{
-		if(frame_info.first_reg && frame_info.last_reg)
-			emit_insn (gen_restore_regs (gen_rtx_REG (SImode, frame_info.first_reg),
-				gen_rtx_REG (SImode, frame_info.last_reg)));
-
-		emit_jump_insn (gen_return_internal());
-
-		INVALIDATE_FRAME_INFO_IN_EPILOGUE;
-		return;
-	}
-
-	for (i = LAST_SAVED_REGNUM; i >= 0; )
-	{
-		j = i;
-
-		while (rmask & (1 << j))
-			j--;
-
-		if (j < i)
-		{
-			if (--rblocks == 0)
-			{
-				emit_insn (gen_restore_regs (gen_rtx_REG (SImode, frame_info.first_reg),
-					gen_rtx_REG (SImode, frame_info.last_reg)));
-
-				emit_jump_insn (gen_return_internal());
-
-				INVALIDATE_FRAME_INFO_IN_EPILOGUE;
-				return;
-			}
-			else
-			{
-				emit_insn (gen_restore_regs (gen_rtx_REG (SImode, j+1),
-					gen_rtx_REG (SImode, i)));
-			}
-
-			i = j;
-		}
-		else
-			i--;
-	}
+	emit_jump_insn (gen_return_internal());
 
 	INVALIDATE_FRAME_INFO_IN_EPILOGUE;
 }
