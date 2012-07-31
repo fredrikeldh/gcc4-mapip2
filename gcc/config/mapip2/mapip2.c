@@ -28,6 +28,8 @@
 #include "diagnostic-core.h"
 #include "df.h"
 
+#define TARGET_ASM_NAMED_SECTION default_elf_asm_named_section
+
 #include "target.h"
 #include "target-def.h"
 
@@ -639,13 +641,6 @@ static void TARGET_PRINT_OPERAND_ADDRESS(FILE *file, rtx addr)
 	default:
 		abort_with_insn (addr, "PRINT_OPERAND_ADDRESS, invalid insn #1");
 	}
-}
-
-#undef TARGET_ASM_NAMED_SECTION
-static void TARGET_ASM_NAMED_SECTION (const char *name, unsigned int flags, tree decl ATTRIBUTE_UNUSED)
-{
-	fprintf (asm_out_file, ".section %s,0x%x\n",
-		name, flags);
 }
 
 #undef TARGET_ASM_INTEGER
