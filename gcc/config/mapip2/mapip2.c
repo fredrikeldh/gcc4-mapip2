@@ -358,11 +358,13 @@ static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
 	if(named == 0)
 		return 0;
 
+#if 0
 	if (type)
 	{
 		int unsignedp ATTRIBUTE_UNUSED;
 		PROMOTE_MODE (mode, unsignedp, type);
 	}
+#endif
 
 	if(mode == DFmode || mode == SFmode)
 	{
