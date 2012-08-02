@@ -64,3 +64,4 @@ $SRCDIR/configure \
 
 mkdir -p gcc
 touch gcc/insn-flags.h
+make

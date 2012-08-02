@@ -1814,7 +1814,7 @@ m68k-*-rtems*)
 	extra_parts="crtbegin.o crtend.o"
 	;;
 mapip2-*)
-	tm_file="${tm_file} mapip2/mapip2.h"
+	tm_file="newlib-stdint.h ${tm_file}"
 	tmake_file=mapip2/t-mapip2
 	inhibit_libc=true
 	;;
