@@ -1,3 +1,4 @@
+#include "../newlib-stdint.h"
 #include "config.h"
 #include "system.h"
 #include <signal.h>
@@ -323,12 +324,18 @@ static const unsigned MAX_INT_ARGS_IN_REGS = 4;
 static const unsigned MAX_FLOAT_ARGS_IN_REGS = 8;
 
 #undef TARGET_FUNCTION_ARG_ADVANCE
-static void TARGET_FUNCTION_ARG_ADVANCE (CUMULATIVE_ARGS *ca ATTRIBUTE_UNUSED,
+static void TARGET_FUNCTION_ARG_ADVANCE (CUMULATIVE_ARGS *ca,
 	enum machine_mode mode,
 	const_tree type,
-	bool named ATTRIBUTE_UNUSED)
+	bool named)
 {
 	unsigned words = (3 + FUNCTION_ARG_SIZE (mode, type)) / 4;
+	if(!named)
+	{
+		ca->s += words;
+		return;
+	}
+
 	if(mode == DFmode || mode == SFmode)
 	{
 		if (ca->f < MAX_FLOAT_ARGS_IN_REGS)
@@ -355,7 +362,15 @@ static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
 	rtx x;
 	unsigned words;
 
-	if(named == 0)
+#if 0
+	printf("TARGET_FUNCTION_ARG(%smode, named %i)\n", GET_MODE_NAME(mode), named);
+#endif
+
+	/* if we encounter an unnamed parameter, it is actually (gcc bug)
+	 * the last named parameter before an ellipsis (...)
+	 * so we want that to be passed in a register.
+	 * testcase: void func(int,int,int,int, ...); */
+	if(named == 0 && ca->s != 0)
 		return 0;
 
 #if 0
