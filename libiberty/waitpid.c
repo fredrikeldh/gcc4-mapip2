@@ -23,6 +23,7 @@ does the return value.  The third argument is unused in @libib{}.
 #include <sys/wait.h>
 #endif
 
+#ifndef WIN32
 pid_t
 waitpid (pid_t pid, int *stat_loc, int options ATTRIBUTE_UNUSED)
 {
@@ -33,3 +34,4 @@ waitpid (pid_t pid, int *stat_loc, int options ATTRIBUTE_UNUSED)
 	return wpid;
     }
 }
+#endif

@@ -26,6 +26,9 @@ the resulting executable to be covered by the GNU General Public License.
 This exception does not however invalidate any other reasons why
 the executable file might be covered by the GNU General Public License. */
 
+int dummy;
+
+#if 0
 #include <ansidecl.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -55,4 +58,5 @@ vsprintf (char *buf, const char *format, va_list ap)
 
 }
 
+#endif
 #endif

@@ -777,9 +777,9 @@ $(CONFIGURED_OFILES): stamp-picdir
 
 ./md5.$(objext): $(srcdir)/md5.c config.h $(INCDIR)/ansidecl.h $(INCDIR)/md5.h
 	if [ x"$(PICFLAG)" != x ]; then \
-	  $(COMPILE.c) $(PICFLAG) $(srcdir)/md5.c -o pic/$@; \
+	  $(COMPILE.c) $(PICFLAG) $(srcdir)/md5.c -Wno-strict-aliasing -o pic/$@; \
 	else true; fi
-	$(COMPILE.c) $(srcdir)/md5.c $(OUTPUT_OPTION)
+	$(COMPILE.c) $(srcdir)/md5.c $(OUTPUT_OPTION) -Wno-strict-aliasing
 
 ./memchr.$(objext): $(srcdir)/memchr.c $(INCDIR)/ansidecl.h
 	if [ x"$(PICFLAG)" != x ]; then \
