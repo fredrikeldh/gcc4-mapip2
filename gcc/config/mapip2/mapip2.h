@@ -287,6 +287,10 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 #define DBX_DEBUGGING_INFO 1
 #endif
 #define PREFERRED_DEBUGGING_TYPE DBX_DEBUG
+/* Do not break .stabs pseudos into continuations.  */
+#define DBX_CONTIN_LENGTH 0
+/* This allows us to output an extra stab in the function prologue. */
+#define DBX_FUNCTION_FIRST
 
 /* sections */
 #define TEXT_SECTION_ASM_OP ".text"

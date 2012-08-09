@@ -681,6 +681,43 @@ static bool TARGET_ASM_INTEGER (rtx x, unsigned int size, int aligned_p)
 #undef TARGET_PROMOTE_FUNCTION_MODE
 #define TARGET_PROMOTE_FUNCTION_MODE default_promote_function_mode_always_promote
 
+#undef TARGET_ASM_FUNCTION_END_PROLOGUE
+static void TARGET_ASM_FUNCTION_END_PROLOGUE (FILE *file)
+{
+	CUMULATIVE_ARGS* ca = &crtl->args.info;
+
+	rtx x = crtl->return_rtx;
+/*	const rtx func_rtx = current_function_decl; */
+
+	register enum rtx_code code;
+	const char *mtype = "void";
+
+/*	c_dump_tree ( (void *)info, func_rtx); */
+/*	dump_node (func_rtx, 1, file); */
+
+	if (x)
+	{
+		code = GET_CODE (x);
+
+		if (code == SIGN_EXTEND)
+			x = XEXP (x, 0), code = GET_CODE (x);
+
+		switch(GET_MODE(x))
+		{
+			case SFmode: mtype = "float"; break;
+			case DFmode: mtype = "double"; break;
+			case SImode: mtype = "int"; break;
+			case DImode: mtype = "long"; break;
+			default: mtype = "?"; break;
+		}
+	}
+
+	/* emit the function directive with the number of input params*/
+#define N_MOSYNC 0xfa
+	fprintf (file, "\t.stabs\t\"%s,%d,%d\",%d,0,0,0\n",
+		mtype, ca->i, ca->f, N_MOSYNC);
+}
+
 #undef  TARGET_ASM_FUNCTION_EPILOGUE
 static void TARGET_ASM_FUNCTION_EPILOGUE (FILE *file ATTRIBUTE_UNUSED, HOST_WIDE_INT size ATTRIBUTE_UNUSED)
 {
