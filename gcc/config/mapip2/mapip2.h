@@ -312,4 +312,7 @@ void mapip2_expand_prologue(void);
 void mapip2_expand_epilogue(void);
 int simple_return(void);
 
+void mapip2_indirect_jump(rtx);
+void mapip2_tablejump(rtx, rtx);
+
 #endif	/*MAPIP2_H*/

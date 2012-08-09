@@ -289,17 +289,33 @@
 	""
 	"jp %0")
 
-(define_insn "indirect_jump"
+(define_expand "indirect_jump"
 	[(set (pc) (match_operand:SI 0 "register_operand" "r"))]
 	""
-	"jp %0")
+	"mapip2_indirect_jump(operands[0]);")
 
-(define_insn "tablejump"
+(define_expand "tablejump"
 	[(set (pc)
 		(match_operand:SI 0 "register_operand" "r"))
 		(use (label_ref (match_operand 1 "" "")))]
 	""
-	"jp %0	//%1")
+	"mapip2_tablejump(operands[0], operands[1]);")
+
+(define_insn "casesi"
+	[(set (pc) (if_then_else
+		(leu (minus:SI (match_operand:SI 0 "register_operand" "r")
+			(match_operand:SI 1 "immediate_operand" "i"))
+			(match_operand:SI 2 "immediate_operand" "i"))
+		(plus:SI (sign_extend:SI
+			(mem:SI
+			(plus:SI (pc)
+			(mult:SI (minus:SI (match_dup 0)
+				(match_dup 1))
+				(const_int 4)))))
+			(label_ref (match_operand 3 "" "")))
+		(label_ref (match_operand 4 "" ""))))]
+	""
+	"case %0,%1,%2,%3,%4")
 
 ; fixme: allow constant zero
 (define_insn "cbranchsi4"

@@ -1073,3 +1073,13 @@ void mapip2_expand_epilogue(void)
 
 	INVALIDATE_FRAME_INFO_IN_EPILOGUE;
 }
+
+void mapip2_indirect_jump(rtx reg ATTRIBUTE_UNUSED) {
+	printf("mapip2_indirect_jump\n");
+	gcc_assert(false);
+}
+
+void mapip2_tablejump(rtx reg ATTRIBUTE_UNUSED, rtx label ATTRIBUTE_UNUSED) {
+	printf("mapip2_tablejump\n");
+	gcc_assert(false);
+}
