@@ -1209,6 +1209,10 @@ write_state (const char *state_path)
   if (fclose (state_file))
     fatal ("failed to close state file %s [%s]",
 	   temp_state_path, xstrerror (errno));
+#ifdef _WIN32
+	/* rename() on Windows will not overwrite existing files. */
+	remove(state_path);
+#endif
   if (rename (temp_state_path, state_path))
     fatal ("failed to rename %s to state file %s [%s]", temp_state_path,
 	   state_path, xstrerror (errno));
