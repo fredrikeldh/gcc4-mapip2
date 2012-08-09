@@ -183,6 +183,9 @@ int mapip2_hard_regno_mode_ok(int regno, int mode)
 	int c = GET_MODE_CLASS(mode);
 	if(FLOAT_REGNO_P(regno))
 		return c == MODE_FLOAT || c == MODE_COMPLEX_FLOAT;
+	/* can't store a multi-word value in the last word register. */
+	else if(GET_MODE_SIZE(mode) > UNITS_PER_WORD && regno == 31)
+		return 0;
 	else
 		return 1;
 }
