@@ -276,8 +276,8 @@ void mapip2_asm_output_addr_vec_elt PARAMS ((FILE* stream, int value));
 
 /* file framework */
 #define ASM_COMMENT_START "//"
-#define ASM_APP_ON "//APP"
-#define ASM_APP_OFF "//NO_APP"
+#define ASM_APP_ON "//APP\n"
+#define ASM_APP_OFF "//NO_APP\n"
 
 /* debugging info */
 #if 0
