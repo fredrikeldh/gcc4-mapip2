@@ -7,17 +7,18 @@ This list is not sorted.
 * Relative jumps.	ASSEMBLER ONLY?
 * Move the most-used non-8-bit immediates to non-writable registers, and change the instructions that use them. LINKER ONLY?
  * Assembler insns would have to be made relaxable, I think.
-* Fix emit_move_insn bug.
+* Fix emit_move_insn bug. DONE!
 * Fix builtin-bitops-1.c.
 * Fix 930622-2.c.
 * Fix longlong-to-float conversion.	DONE!
 * Direct floating-point support.	DONE!
  * Let's have 16 64-bit registers.	DONE!
  * Allocate f8 for return values. DONE!
- * Save half of them. Allow parameter passing in the other half.	BUGGED!
-  * Fix saving of f0 - f7.
+ * Save half of them. Allow parameter passing in the other half.	DONE!
+  * Fix saving of f0 - f7.	DONE!
 * Register allocation order.
- * f8-f15, f0-f7, g0-g13, p0-p3, r0-r1, s0-s7, fr. (zr, ra, sp are fixed and may not be allocated by anything.)
+ * f8-f15, f0-f7, g0-g13, p0-p3, r0-r1, fr, s0-s7. (zr, ra, sp are fixed and may not be allocated by anything.)
 * Fix jc zr.
+* Fix ld [mem],zr.
 * Copy testsuite here. We have a modification or two.
 * Change CASE insn to store operands in .rodata section, for faster load?
