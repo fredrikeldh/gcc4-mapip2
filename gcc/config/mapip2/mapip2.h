@@ -26,6 +26,20 @@ while (0)
 #define FLOAT_REGISTER_COUNT (16)
 #define FIRST_FAKE_REGISTER (FIRST_FLOAT_REGISTER + FLOAT_REGISTER_COUNT)
 
+/* register allocation order */
+/* f8-f15, f0-f7, g0-g13, p0-p3, r0-r1, fr, s0-s7.
+	(zr, ra, sp are fixed and may not be allocated by anything.) */
+#define REG_ALLOC_ORDER {\
+	40,41,42,43,44,45,46,47,\
+	32,33,34,35,36,37,38,39,\
+	16,17,18,19,20,21,22,23,\
+	24,25,26,27,28,29,\
+	12,13,14,15,\
+	30,31,\
+	3,\
+	4,5,6,7,8,9,10,11,\
+}
+
 #define FIXED_REGISTERS \
 { \
 	1, 1, 1, 0, /*special*/\
