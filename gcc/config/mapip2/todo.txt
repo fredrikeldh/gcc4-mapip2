@@ -5,6 +5,7 @@ This list is not sorted.
  * If you want to debug, pass -fno-omit-frame-pointer.
 * Smaller constants (8, 16, and 24-bit).	ASSEMBLER ONLY.
 * Relative jumps.	ASSEMBLER ONLY?
+* Use remaining register numbers as constant pools. ASSEMBLER/LINKER ONLY?
 * Move the most-used non-8-bit immediates to non-writable registers, and change the instructions that use them. LINKER ONLY?
  * Assembler insns would have to be made relaxable, I think.
 * Fix emit_move_insn bug. DONE!
