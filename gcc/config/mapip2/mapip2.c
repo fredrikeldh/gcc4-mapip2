@@ -19,6 +19,7 @@
 #include "basic-block.h"
 
 #include "tree.h"
+#include "tree-pass.h"
 #include "function.h"
 #include "expr.h"
 #include "flags.h"
@@ -716,6 +717,117 @@ static void TARGET_ASM_FUNCTION_END_PROLOGUE (FILE *file)
 #define N_MOSYNC 0xfa
 	fprintf (file, "\t.stabs\t\"%s,%d,%d\",%d,0,0,0\n",
 		mtype, ca->i, ca->f, N_MOSYNC);
+}
+
+#define DEBUG_POSTSCAN 0
+
+#undef TARGET_ASM_FINAL_POSTSCAN_INSN
+static void TARGET_ASM_FINAL_POSTSCAN_INSN (FILE *file, rtx insn, rtx *opvec ATTRIBUTE_UNUSED, int noperands ATTRIBUTE_UNUSED)
+{
+	if(GET_CODE(insn) == CALL_INSN)
+	{
+		rtx usage = CALL_INSN_FUNCTION_USAGE(insn);
+		int iregs = 0;
+		int fregs = 0;
+		const char* returnType;
+		static int labelNum = 0;
+		/*print_rtl(file, insn);*/
+		ASM_OUTPUT_DEBUG_LABEL(file, "LMOSYNC", ++labelNum);
+		fprintf(file, "\t.stabs\t\"");
+		while(usage)
+		{
+			/* count parameter registers */
+			rtx use, reg;
+			int regno;
+			enum machine_mode mode;
+			/* assert that all the RTX:s have the correct code before trying to access them. */
+#if DEBUG_POSTSCAN
+			print_rtl(file, usage);
+#endif
+			gcc_assert(GET_CODE(usage) == EXPR_LIST);
+#if DEBUG_POSTSCAN
+			fprintf(file, "looks %s\n", (GET_CODE(usage) == EXPR_LIST) ? "good" : "bad");
+#endif
+			use = XEXP(usage, 0);
+			gcc_assert(GET_CODE(use) == USE);
+			reg = XEXP(use, 0);
+			gcc_assert(GET_CODE(reg) == REG);
+#if DEBUG_POSTSCAN
+			fprintf(file, "reg: ");
+			print_rtl(file, reg);
+#endif
+
+			regno = REGNO(reg);
+			mode = GET_MODE(reg);
+
+#if DEBUG_POSTSCAN
+			fprintf(file, "\nregno %i, mode %s\n", regno, GET_MODE_NAME(mode));
+#endif
+
+			switch(mode) {
+			case DImode:
+				regno++;
+				/* intentional fallthrough */
+			case SImode:
+				gcc_assert(regno >= P0_REGNUM && regno <= P3_REGNUM);
+				iregs = MAX(iregs, (regno - P0_REGNUM) + 1);
+				break;
+			case SFmode:
+			case DFmode:
+				gcc_assert(regno >= FR8_REGNUM && regno <= FR15_REGNUM);
+				fregs = MAX(fregs, (regno - FR8_REGNUM) + 1);
+				break;
+			default:
+				printf("Unrecognized mode: %s\n", GET_MODE_NAME(mode));
+				gcc_assert(false);
+			}
+
+			usage = XEXP(usage, 1);
+#if DEBUG_POSTSCAN
+			fprintf(file, "next: ");
+			print_rtl(file, usage);
+#endif
+		}
+
+		/* find the return type. */
+		{
+			rtx pattern = PATTERN(insn);
+			gcc_assert(pattern);
+#if DEBUG_POSTSCAN
+			fprintf(file, "\npattern:\n");
+			print_rtl(file, pattern);
+#endif
+			if(GET_CODE(pattern) == PARALLEL)
+			{
+				pattern = XVECEXP(pattern, 0, 0);
+				gcc_assert(pattern);
+#if DEBUG_POSTSCAN
+				fprintf(file, "\ndeparl'd:\n");
+				print_rtl(file, pattern);
+#endif
+			}
+			if(GET_CODE(pattern) == SET)
+			{
+				rtx reg = XEXP(pattern, 0);
+				gcc_assert(GET_CODE(reg) == REG);
+				returnType = GET_MODE_NAME(GET_MODE(reg));
+			}
+			else
+			{
+				gcc_assert(GET_CODE(pattern) == CALL);
+#if 0
+				print_rtl(file, pattern);
+				fprintf(file, "\n%s", (GET_CODE(pattern) == CALL) ? "" : "weird one\n");
+#endif
+				returnType = "VOID";
+			}
+		}
+
+		fprintf(file, "%s,%i,%i", returnType, iregs, fregs);
+
+		fprintf(file, "\",%d,1,0,LMOSYNC%i\n",
+			N_MOSYNC, labelNum);
+	}
 }
 
 #undef  TARGET_ASM_FUNCTION_EPILOGUE
