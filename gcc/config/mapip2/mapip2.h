@@ -146,6 +146,7 @@ do { \
 #define DEFAULT_SIGNED_CHAR 0
 #define WCHAR_TYPE_SIZE 16
 #define WCHAR_TYPE "short unsigned int"
+#define WINT_TYPE "int"
 
 /* addressing modes */
 #define MAX_REGS_PER_ADDRESS 1
