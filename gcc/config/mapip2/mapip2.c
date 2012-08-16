@@ -389,40 +389,47 @@ static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
 	{
 		if (ca->f >= MAX_FLOAT_ARGS_IN_REGS)
 			return 0;
-		return gen_rtx_REG (mode, FR8_REGNUM + ca->f);
+
+		x = gen_rtx_REG (mode, FR8_REGNUM + ca->f);
 	}
-
-	words = ca->i;
-
-	if (words >= MAX_INT_ARGS_IN_REGS)
-		return 0;
-
-	switch (mode)
+	else
 	{
-	default:
-	case BLKmode:
-		words += ((int_size_in_bytes (type) + UNITS_PER_WORD - 1) / UNITS_PER_WORD);
-		break;
+		words = ca->i;
 
-	case DImode:
-		words += 2;
-		break;
+		if (words >= MAX_INT_ARGS_IN_REGS)
+			return 0;
 
-	case VOIDmode:
-	case QImode:
-	case HImode:
-	case SImode:
-		words++;
-		break;
+		switch (mode)
+		{
+		default:
+		case BLKmode:
+			words += ((int_size_in_bytes (type) + UNITS_PER_WORD - 1) / UNITS_PER_WORD);
+			break;
+
+		case DImode:
+			words += 2;
+			break;
+
+		case VOIDmode:
+		case QImode:
+		case HImode:
+		case SImode:
+			words++;
+			break;
+		}
+
+		if (words > MAX_INT_ARGS_IN_REGS)
+			return 0;
+
+		x = gen_rtx_REG (mode, P0_REGNUM + ca->i);
 	}
-
-	if (words > MAX_INT_ARGS_IN_REGS)
-		return 0;
-
-	x = gen_rtx_REG (mode, P0_REGNUM + ca->i);
 
 	if (x == 0)
 		abort ();
+
+	/* update ca, so the function's register usage count remains valid. */
+	if(named == 0 && ca->s == 0)
+		TARGET_FUNCTION_ARG_ADVANCE(ca, mode, type, 1);
 
 	return x;
 }
