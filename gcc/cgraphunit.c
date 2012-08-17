@@ -1198,7 +1198,7 @@ cgraph_mark_functions_to_output (void)
 
 /* DECL is FUNCTION_DECL.  Initialize datastructures so DECL is a function
    in lowered gimple form.
-   
+
    Set current_function_decl and cfun to newly constructed empty function body.
    return basic block in the function body.  */
 
@@ -1380,7 +1380,7 @@ assemble_thunk (struct cgraph_node *node)
     {
       const char *fnname;
       tree fn_block;
-      
+
       DECL_RESULT (thunk_fndecl)
 	= build_decl (DECL_SOURCE_LOCATION (thunk_fndecl),
 		      RESULT_DECL, 0, integer_type_node);
@@ -1419,7 +1419,9 @@ assemble_thunk (struct cgraph_node *node)
       gimple call;
       gimple ret;
 
+#if 0
       DECL_IGNORED_P (thunk_fndecl) = 1;
+#endif
       bitmap_obstack_initialize (NULL);
 
       if (node->thunk.virtual_offset_p)
@@ -1966,9 +1968,9 @@ update_call_expr (struct cgraph_node *new_version)
    edges which should be redirected to point to
    NEW_VERSION.  ALL the callees edges of OLD_VERSION
    are cloned to the new version node.  Return the new
-   version node. 
+   version node.
 
-   If non-NULL BLOCK_TO_COPY determine what basic blocks 
+   If non-NULL BLOCK_TO_COPY determine what basic blocks
    was copied to prevent duplications of calls that are dead
    in the clone.  */
 
