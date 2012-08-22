@@ -246,9 +246,13 @@ void mapip2_asm_output_labelref PARAMS ((FILE* stream, const char* name));
 void mapip2_asm_weaken_label PARAMS ((FILE* stream, const char* name));
 #define ASM_OUTPUT_WEAK_ALIAS mapip2_asm_output_weak_alias
 void mapip2_asm_output_weak_alias PARAMS ((FILE* stream, const char* name, const char* value));
+#define ASM_DECLARE_FUNCTION_NAME mapip2_asm_declare_function_name
+void mapip2_asm_declare_function_name PARAMS ((FILE* stream, const char* name, tree decl));
+#define ASM_DECLARE_FUNCTION_SIZE mapip2_asm_declare_function_size
+void mapip2_asm_declare_function_size PARAMS ((FILE* stream, const char* name, tree decl));
 
-#define SIZE_ASM_OP	"\t.size\t"
-#define TYPE_ASM_OP	"\t.type\t"
+#define SIZE_ASM_OP	".size "
+#define TYPE_ASM_OP	".type "
 #define TYPE_OPERAND_FMT "@%s"
 
 /* disabled because it creates ugly code. */

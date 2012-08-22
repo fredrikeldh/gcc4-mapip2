@@ -923,6 +923,19 @@ void mapip2_asm_output_local(FILE* stream, const char* name, int size, int round
 	fprintf(stream, ", %d\t// size=%d\n", rounded, size);
 }
 
+void mapip2_asm_declare_function_name(FILE* stream, const char* name, tree decl ATTRIBUTE_UNUSED)
+{
+	ASM_OUTPUT_TYPE_DIRECTIVE(stream, name, "function");
+	ASM_OUTPUT_FUNCTION_LABEL(stream, name, decl);
+}
+
+void mapip2_asm_declare_function_size(FILE* stream, const char* name, tree decl ATTRIBUTE_UNUSED)
+{
+	if(!flag_inhibit_size_directive)
+		ASM_OUTPUT_MEASURED_SIZE(stream, name);
+}
+
+
 void default_globalize_label(FILE* stream, const char* name)
 {
 	fputs(".global\t", stream);
