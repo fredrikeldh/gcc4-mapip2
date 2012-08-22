@@ -247,6 +247,10 @@ void mapip2_asm_weaken_label PARAMS ((FILE* stream, const char* name));
 #define ASM_OUTPUT_WEAK_ALIAS mapip2_asm_output_weak_alias
 void mapip2_asm_output_weak_alias PARAMS ((FILE* stream, const char* name, const char* value));
 
+#define SIZE_ASM_OP	"\t.size\t"
+#define TYPE_ASM_OP	"\t.type\t"
+#define TYPE_OPERAND_FMT "@%s"
+
 /* disabled because it creates ugly code. */
 /* #define SET_ASM_OP ".set\t" */
 
