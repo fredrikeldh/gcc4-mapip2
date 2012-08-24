@@ -193,35 +193,51 @@ int mapip2_hard_regno_mode_ok(int regno, int mode)
 
 int mapip2_modes_tieable_p(int mode1, int mode2)
 {
-	/* todo: make single and double floats tiable? */
+	/* make single and double floats tiable? */
+	/* no, because a floats in int registers have different sizes. */
 	return (GET_MODE_CLASS(mode1) == GET_MODE_CLASS(mode2) ||
 		GET_MODE_SIZE(mode1) == GET_MODE_SIZE(mode2));
 }
 
+static int floatNRegs(int mode) {
+	switch(mode) {
+	case SFmode:
+	case DFmode:
+		return 1;
+	case SCmode:
+	case DCmode:
+		return 2;
+	default:
+#if 0
+		printf("Unhandled mode: %s\n", GET_MODE_NAME(mode));
+		gcc_assert(false);
+#else
+		/* gcc actually calls HARD_REGNO_NREGS on every register with every mode, just to check. */
+		return 1;
+#endif
+	}
+}
+
 int mapip2_hard_regno_nregs(int regno, int mode)
 {
-	/* integer */
-	if(regno <= R1_REGNUM || regno >= RAP_REGNUM)
-		return ((GET_MODE_SIZE(mode) + UNITS_PER_WORD - 1) / UNITS_PER_WORD);
-	/* float */
 #if 0
-	enum mode_class c = GET_MODE_CLASS(mode);
-	if(c != MODE_FLOAT && mode != MODE_RANDOM)
-	{
-		fprintf(stderr, "Unsupported mode for float register %i: %s\n", regno, GET_MODE_NAME(mode));
-		gcc_assert(false);
-	}
-	return 1;
+	printf("mapip2_hard_regno_nregs(%s, %smode)\n", reg_names[regno], GET_MODE_NAME(mode));
 #endif
-#define UNITS_PER_FPREG 8
-	return (GET_MODE_SIZE (mode) + UNITS_PER_FPREG - 1) / UNITS_PER_FPREG;
+	/* float */
+	if(regno >= FR0_REGNUM && regno <= FR15_REGNUM)
+		return floatNRegs(mode);
+	/* integer */
+	return ((GET_MODE_SIZE(mode) + UNITS_PER_WORD - 1) / UNITS_PER_WORD);
 }
 
 int mapip2_class_max_nregs(int CLASS, int MODE)
 {
+#if 0
+	printf("mapip2_class_max_nregs(%s, %smode)\n", reg_class_names[CLASS], GET_MODE_NAME(MODE));
+#endif
 	/* float */
 	if(CLASS == FLOAT_REGS)
-		return (GET_MODE_SIZE (MODE) + UNITS_PER_FPREG - 1) / UNITS_PER_FPREG;
+		return floatNRegs(MODE);
 	else	/* integer */
 		return ((GET_MODE_SIZE(MODE) + UNITS_PER_WORD - 1) / UNITS_PER_WORD);
 }
@@ -302,7 +318,7 @@ static rtx TARGET_FUNCTION_VALUE (const_tree type,
 	const_tree fn_decl_or_type ATTRIBUTE_UNUSED, bool outgoing ATTRIBUTE_UNUSED)
 {
 	enum machine_mode mode = TYPE_MODE(type);
-	if(GET_MODE_CLASS(mode) == MODE_FLOAT)
+	if(FLOAT_MODE_P(mode))
 		return gen_rtx_REG(mode, FR8_REGNUM);
 	if(GET_MODE_SIZE(mode) < 4)
 		mode = SImode;
@@ -347,6 +363,14 @@ static void TARGET_FUNCTION_ARG_ADVANCE (CUMULATIVE_ARGS *ca,
 			ca->f++;
 			return;
 		}
+	}
+	else if(mode == DCmode || mode == SCmode)
+	{
+		if (ca->f < MAX_FLOAT_ARGS_IN_REGS - 1)
+		{
+			ca->f += 2;
+			return;
+		}
 	} else {
 		if(ca->i + words <= MAX_INT_ARGS_IN_REGS)
 		{
@@ -388,6 +412,13 @@ static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
 	if(mode == DFmode || mode == SFmode)
 	{
 		if (ca->f >= MAX_FLOAT_ARGS_IN_REGS)
+			return 0;
+
+		x = gen_rtx_REG (mode, FR8_REGNUM + ca->f);
+	}
+	else if(mode == DCmode || mode == SCmode)
+	{
+		if (ca->f >= MAX_FLOAT_ARGS_IN_REGS - 1)
 			return 0;
 
 		x = gen_rtx_REG (mode, FR8_REGNUM + ca->f);
@@ -437,7 +468,7 @@ static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
 #undef TARGET_LIBCALL_VALUE
 static rtx TARGET_LIBCALL_VALUE (enum machine_mode mode, const_rtx fun ATTRIBUTE_UNUSED)
 {
-	if(GET_MODE_CLASS(mode) == MODE_FLOAT)
+	if(FLOAT_REGNO_P(mode))
 		return gen_rtx_REG(mode, FR8_REGNUM);
 	return gen_rtx_REG (mode, R0_REGNUM);
 }
@@ -499,10 +530,6 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 	if (code == REG)
 	{
 		int regno = REGNO(x);
-
-		if (letter == 'D')					/* High part of double */
-			regno++;
-
 		fputs(reg_names[regno], file);
 		return;
 	}
@@ -737,9 +764,7 @@ static void TARGET_ASM_FINAL_POSTSCAN_INSN (FILE *file, rtx insn, rtx *opvec ATT
 		int iregs = 0;
 		int fregs = 0;
 		const char* returnType;
-		static int labelNum = 0;
 		/*print_rtl(file, insn);*/
-		ASM_OUTPUT_DEBUG_LABEL(file, "LMOSYNC", ++labelNum);
 		fprintf(file, "\t.stabs\t\"");
 		while(usage)
 		{
@@ -783,6 +808,13 @@ static void TARGET_ASM_FINAL_POSTSCAN_INSN (FILE *file, rtx insn, rtx *opvec ATT
 			case DFmode:
 				gcc_assert(regno >= FR8_REGNUM && regno <= FR15_REGNUM);
 				fregs = MAX(fregs, (regno - FR8_REGNUM) + 1);
+				break;
+			case DCmode:
+			case SCmode:
+				if(!(regno >= FR8_REGNUM && regno < FR15_REGNUM))
+					printf("Bad register %i in %smode\n", regno, GET_MODE_NAME(mode));
+				gcc_assert(regno >= FR8_REGNUM && regno < FR15_REGNUM);
+				fregs = MAX(fregs, (regno - FR8_REGNUM) + 2);
 				break;
 			default:
 				printf("Unrecognized mode: %s\n", GET_MODE_NAME(mode));
@@ -832,8 +864,8 @@ static void TARGET_ASM_FINAL_POSTSCAN_INSN (FILE *file, rtx insn, rtx *opvec ATT
 
 		fprintf(file, "%s,%i,%i", returnType, iregs, fregs);
 
-		fprintf(file, "\",%d,1,0,LMOSYNC%i\n",
-			N_MOSYNC, labelNum);
+		fprintf(file, "\",%d,1,0,.\n",
+			N_MOSYNC);
 	}
 }
 
