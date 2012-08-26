@@ -136,20 +136,30 @@
 	ld.d [%0],%z1")
 
 (define_insn "truncdfsf2"
-	[(set (match_operand:SF 0 "register_operand" "=A")
-		(float_truncate:SF (match_operand:DF 1 "register_operand" "f")))]
+	[(set (match_operand:SF 0 "register_operand" "=f,A")
+		(float_truncate:SF (match_operand:DF 1 "register_operand" "0,f")))]
 	""
-	"ld %0,%z1")
+	"@
+	// truncdfsf2 %0,%1
+	ld %0,%z1")
 
 (define_insn "extendsfdf2"
-	[(set (match_operand:DF 0 "register_operand" "=f")
-		(float_extend:DF (match_operand:SF 1 "register_operand" "A")))]
+	[(set (match_operand:DF 0 "register_operand" "=f,f")
+		(float_extend:DF (match_operand:SF 1 "register_operand" "0,A")))]
 	""
-	"ld %0,%z1")
+	"@
+	// extendsfdf2 %0,%1
+	ld %0,%z1")
 
 (define_insn "floatsidf2"
 	[(set (match_operand:DF 0 "register_operand" "=f")
 		(float:DF (match_operand:SI 1 "register_operand" "r")))]
+	""
+	"float.s %0,%z1")
+
+(define_insn "floatsisf2"
+	[(set (match_operand:SF 0 "register_operand" "=f")
+		(float:SF (match_operand:SI 1 "register_operand" "r")))]
 	""
 	"float.s %0,%z1")
 
@@ -159,15 +169,33 @@
 	""
 	"float.d %0,%z1")
 
+(define_insn "floatdisf2"
+	[(set (match_operand:SF 0 "register_operand" "=f")
+		(float:SF (match_operand:DI 1 "register_operand" "r")))]
+	""
+	"float.d %0,%z1")
+
 (define_insn "floatunsidf2"
 	[(set (match_operand:DF 0 "register_operand" "=f")
 		(unsigned_float:DF (match_operand:SI 1 "register_operand" "r")))]
 	""
 	"floatun.s %0,%z1")
 
+(define_insn "floatunsisf2"
+	[(set (match_operand:SF 0 "register_operand" "=f")
+		(unsigned_float:SF (match_operand:SI 1 "register_operand" "r")))]
+	""
+	"floatun.s %0,%z1")
+
 (define_insn "floatundidf2"
 	[(set (match_operand:DF 0 "register_operand" "=f")
 		(unsigned_float:DF (match_operand:DI 1 "register_operand" "r")))]
+	""
+	"floatun.d %0,%z1")
+
+(define_insn "floatundisf2"
+	[(set (match_operand:SF 0 "register_operand" "=f")
+		(unsigned_float:SF (match_operand:DI 1 "register_operand" "r")))]
 	""
 	"floatun.d %0,%z1")
 
@@ -178,9 +206,21 @@
 	""
 	"fix_trunc.s %0,%1")
 
+(define_insn "fix_truncsfsi2"
+	[(set (match_operand:SI 0 "register_operand" "=r")
+		(fix:SI (match_operand:SF 1 "register_operand" "f")))]
+	""
+	"fix_trunc.s %0,%1")
+
 (define_insn "fix_truncdfdi2"
 	[(set (match_operand:DI 0 "register_operand" "=r")
 		(fix:DI (match_operand:DF 1 "register_operand" "f")))]
+	""
+	"fix_trunc.d %0,%1")
+
+(define_insn "fix_truncsfdi2"
+	[(set (match_operand:DI 0 "register_operand" "=r")
+		(fix:DI (match_operand:SF 1 "register_operand" "f")))]
 	""
 	"fix_trunc.d %0,%1")
 
@@ -190,15 +230,34 @@
 	""
 	"fixun_trunc.s %0,%1")
 
+(define_insn "fixuns_truncsfsi2"
+	[(set (match_operand:SI 0 "register_operand" "=r")
+		(unsigned_fix:SI (match_operand:SF 1 "register_operand" "f")))]
+	""
+	"fixun_trunc.s %0,%1")
+
 (define_insn "fixuns_truncdfdi2"
 	[(set (match_operand:DI 0 "register_operand" "=r")
 		(unsigned_fix:DI (match_operand:DF 1 "register_operand" "f")))]
 	""
 	"fixun_trunc.d %0,%1")
 
+(define_insn "fixuns_truncsfdi2"
+	[(set (match_operand:DI 0 "register_operand" "=r")
+		(unsigned_fix:DI (match_operand:SF 1 "register_operand" "f")))]
+	""
+	"fixun_trunc.d %0,%1")
+
+
 (define_insn "sqrtdf2"
 	[(set (match_operand:DF 0 "register_operand" "=f")
 		(sqrt:DF (match_operand:DF 1 "register_operand" "f")))]
+	""
+	"fsqrt %0,%1")
+
+(define_insn "sqrtsf2"
+	[(set (match_operand:SF 0 "register_operand" "=f")
+		(sqrt:SF (match_operand:SF 1 "register_operand" "f")))]
 	""
 	"fsqrt %0,%1")
 
@@ -208,9 +267,21 @@
 	""
 	"fsin %0,%1")
 
+(define_insn "sinsf2"
+	[(set (match_operand:SF 0 "register_operand" "=f")
+		(unspec:SF [(match_operand:SF 1 "register_operand" "f")] 1))]
+	""
+	"fsin %0,%1")
+
 (define_insn "cosdf2"
 	[(set (match_operand:DF 0 "register_operand" "=f")
 		(unspec:DF [(match_operand:DF 1 "register_operand" "f")] 2))]
+	""
+	"fcos %0,%1")
+
+(define_insn "cossf2"
+	[(set (match_operand:SF 0 "register_operand" "=f")
+		(unspec:SF [(match_operand:SF 1 "register_operand" "f")] 2))]
 	""
 	"fcos %0,%1")
 
@@ -220,9 +291,21 @@
 	""
 	"fexp %0,%1")
 
+(define_insn "expsf2"
+	[(set (match_operand:SF 0 "register_operand" "=f")
+		(unspec:SF [(match_operand:SF 1 "register_operand" "f")] 3))]
+	""
+	"fexp %0,%1")
+
 (define_insn "logdf2"
 	[(set (match_operand:DF 0 "register_operand" "=f")
 		(unspec:DF [(match_operand:DF 1 "register_operand" "f")] 4))]
+	""
+	"flog %0,%1")
+
+(define_insn "logsf2"
+	[(set (match_operand:SF 0 "register_operand" "=f")
+		(unspec:SF [(match_operand:SF 1 "register_operand" "f")] 4))]
 	""
 	"flog %0,%1")
 
@@ -233,10 +316,24 @@
 	""
 	"fpow %0,%2")
 
+(define_insn "powsf3"
+	[(set (match_operand:SF 0 "register_operand" "=f")
+		(unspec:SF [(match_operand:SF 1 "register_operand" "0")
+		(match_operand:SF 2 "register_operand" "f")] 5))]
+	""
+	"fpow %0,%2")
+
 (define_insn "atan2df3"
 	[(set (match_operand:DF 0 "register_operand" "=f")
 		(unspec:DF [(match_operand:DF 1 "register_operand" "0")
 		(match_operand:DF 2 "register_operand" "f")] 6))]
+	""
+	"fatan2 %0,%2")
+
+(define_insn "atan2sf3"
+	[(set (match_operand:SF 0 "register_operand" "=f")
+		(unspec:SF [(match_operand:SF 1 "register_operand" "0")
+		(match_operand:SF 2 "register_operand" "f")] 6))]
 	""
 	"fatan2 %0,%2")
 
