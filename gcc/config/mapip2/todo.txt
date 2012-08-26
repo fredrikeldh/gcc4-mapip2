@@ -23,3 +23,4 @@ This list is not sorted.
 * Fix ld [mem],zr.
 * Copy testsuite here. We have a modification or two.
 * Change CASE insn to store operands in .rodata section, for faster load?
+* Note in documentation: indirect jumps and nested functions are not supported.

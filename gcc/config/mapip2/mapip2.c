@@ -797,10 +797,18 @@ static void TARGET_ASM_FINAL_POSTSCAN_INSN (FILE *file, rtx insn, rtx *opvec ATT
 #endif
 
 			switch(mode) {
+			case TImode:
+				regno += 2;
+				/* intentional fallthrough */
 			case DImode:
+			case CSImode:
 				regno++;
 				/* intentional fallthrough */
 			case SImode:
+			case HImode:
+			case QImode:
+				if(!(regno >= P0_REGNUM && regno <= P3_REGNUM))
+					printf("Bad register %i in %smode\n", regno, GET_MODE_NAME(mode));
 				gcc_assert(regno >= P0_REGNUM && regno <= P3_REGNUM);
 				iregs = MAX(iregs, (regno - P0_REGNUM) + 1);
 				break;
