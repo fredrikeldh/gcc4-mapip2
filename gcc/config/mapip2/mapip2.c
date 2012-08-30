@@ -31,6 +31,20 @@
 #include "df.h"
 
 #define TARGET_ASM_NAMED_SECTION default_elf_asm_named_section
+#define TARGET_LIBCALL_VALUE mapip2_target_libcall_value
+#define TARGET_LEGITIMATE_ADDRESS_P mapip2_target_legitimate_address_p
+#define TARGET_PROMOTE_PROTOTYPES hook_bool_const_tree_true
+#define TARGET_ASM_FUNCTION_EPILOGUE mapip2_target_asm_function_epilogue
+#define TARGET_ASM_FINAL_POSTSCAN_INSN mapip2_target_asm_final_postscan_insn
+#define TARGET_PROMOTE_FUNCTION_MODE default_promote_function_mode_always_promote
+#define TARGET_PRINT_OPERAND_ADDRESS mapip2_target_print_operand_address
+#define TARGET_FUNCTION_ARG mapip2_target_function_arg
+#define TARGET_FUNCTION_VALUE mapip2_target_function_value
+#define TARGET_FUNCTION_VALUE_REGNO_P mapip2_target_function_value_regno_p
+#define TARGET_FUNCTION_ARG_ADVANCE mapip2_target_function_arg_advance
+#define TARGET_PRINT_OPERAND mapip2_target_print_operand
+#define TARGET_ASM_INTEGER mapip2_target_asm_integer
+#define TARGET_ASM_FUNCTION_END_PROLOGUE mapip2_target_asm_function_end_prologue
 
 #include "target.h"
 #include "target-def.h"
@@ -261,8 +275,7 @@ static int mapip2_reg_ok_for_base_p(rtx x, int strict)
 /*
 * We support only one addressing mode: register + immediate.
 */
-#undef TARGET_LEGITIMATE_ADDRESS_P
-static bool TARGET_LEGITIMATE_ADDRESS_P(enum machine_mode mode ATTRIBUTE_UNUSED, rtx x, bool strict)
+static bool mapip2_target_legitimate_address_p(enum machine_mode mode ATTRIBUTE_UNUSED, rtx x, bool strict)
 {
 	int valid;
 
@@ -313,8 +326,7 @@ static bool TARGET_LEGITIMATE_ADDRESS_P(enum machine_mode mode ATTRIBUTE_UNUSED,
   return valid;
 }
 
-#undef TARGET_FUNCTION_VALUE
-static rtx TARGET_FUNCTION_VALUE (const_tree type,
+static rtx mapip2_target_function_value (const_tree type,
 	const_tree fn_decl_or_type ATTRIBUTE_UNUSED, bool outgoing ATTRIBUTE_UNUSED)
 {
 	enum machine_mode mode = TYPE_MODE(type);
@@ -325,8 +337,7 @@ static rtx TARGET_FUNCTION_VALUE (const_tree type,
 	return gen_rtx_REG(mode, R0_REGNUM);
 }
 
-#undef TARGET_FUNCTION_VALUE_REGNO_P
-static bool TARGET_FUNCTION_VALUE_REGNO_P (const unsigned int regno)
+static bool mapip2_target_function_value_regno_p (const unsigned int regno)
 {
 	return regno == R0_REGNUM || regno == FR8_REGNUM;
 }
@@ -343,8 +354,7 @@ void mapip2_init_cumulative_args(CUMULATIVE_ARGS* c)
 static const unsigned MAX_INT_ARGS_IN_REGS = 4;
 static const unsigned MAX_FLOAT_ARGS_IN_REGS = 8;
 
-#undef TARGET_FUNCTION_ARG_ADVANCE
-static void TARGET_FUNCTION_ARG_ADVANCE (CUMULATIVE_ARGS *ca,
+static void mapip2_target_function_arg_advance (CUMULATIVE_ARGS *ca,
 	enum machine_mode mode,
 	const_tree type,
 	bool named)
@@ -381,8 +391,7 @@ static void TARGET_FUNCTION_ARG_ADVANCE (CUMULATIVE_ARGS *ca,
 	ca->s += words;
 }
 
-#undef TARGET_FUNCTION_ARG
-static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
+static rtx mapip2_target_function_arg (CUMULATIVE_ARGS *ca,
 	enum machine_mode mode,
 	const_tree type,
 	bool named)
@@ -460,24 +469,26 @@ static rtx TARGET_FUNCTION_ARG (CUMULATIVE_ARGS *ca,
 
 	/* update ca, so the function's register usage count remains valid. */
 	if(named == 0 && ca->s == 0)
-		TARGET_FUNCTION_ARG_ADVANCE(ca, mode, type, 1);
+		mapip2_target_function_arg_advance(ca, mode, type, 1);
 
 	return x;
 }
 
-#undef TARGET_LIBCALL_VALUE
-static rtx TARGET_LIBCALL_VALUE (enum machine_mode mode, const_rtx fun ATTRIBUTE_UNUSED)
+static rtx mapip2_target_libcall_value (enum machine_mode mode, const_rtx fun ATTRIBUTE_UNUSED)
 {
-	if(FLOAT_REGNO_P(mode))
-		return gen_rtx_REG(mode, FR8_REGNUM);
-	return gen_rtx_REG (mode, R0_REGNUM);
+	int regnum;
+	if(FLOAT_MODE_P(mode))
+		regnum = FR8_REGNUM;
+	else
+		regnum = R0_REGNUM;
+	printf("mapip2_target_libcall_value(%smode): %i\n", GET_MODE_NAME(mode), regnum);
+	return gen_rtx_REG(mode, regnum);
 }
 
-#undef TARGET_PRINT_OPERAND
 /*
 * warning: definition seems to have changed since 3.6.4. function may misbehave.
 */
-static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
+static void mapip2_target_print_operand (FILE* file, rtx x, int letter)
 {
 	enum rtx_code code;
 
@@ -623,8 +634,7 @@ static void TARGET_PRINT_OPERAND (FILE* file, rtx x, int letter)
 }
 
 
-#undef TARGET_PRINT_OPERAND_ADDRESS
-static void TARGET_PRINT_OPERAND_ADDRESS(FILE *file, rtx addr)
+static void mapip2_target_print_operand_address(FILE *file, rtx addr)
 {
 	if (!addr)
 	{
@@ -698,8 +708,7 @@ static void TARGET_PRINT_OPERAND_ADDRESS(FILE *file, rtx addr)
 	}
 }
 
-#undef TARGET_ASM_INTEGER
-static bool TARGET_ASM_INTEGER (rtx x, unsigned int size, int aligned_p)
+static bool mapip2_target_asm_integer (rtx x, unsigned int size, int aligned_p)
 {
 	/* work around a bug in assemble_integer() */
 	if (size == UNITS_PER_WORD)
@@ -713,11 +722,7 @@ static bool TARGET_ASM_INTEGER (rtx x, unsigned int size, int aligned_p)
 	return default_assemble_integer (x, size, aligned_p);
 }
 
-#undef TARGET_PROMOTE_FUNCTION_MODE
-#define TARGET_PROMOTE_FUNCTION_MODE default_promote_function_mode_always_promote
-
-#undef TARGET_ASM_FUNCTION_END_PROLOGUE
-static void TARGET_ASM_FUNCTION_END_PROLOGUE (FILE *file)
+static void mapip2_target_asm_function_end_prologue (FILE *file)
 {
 	CUMULATIVE_ARGS* ca = &crtl->args.info;
 
@@ -755,8 +760,7 @@ static void TARGET_ASM_FUNCTION_END_PROLOGUE (FILE *file)
 
 #define DEBUG_POSTSCAN 0
 
-#undef TARGET_ASM_FINAL_POSTSCAN_INSN
-static void TARGET_ASM_FINAL_POSTSCAN_INSN (FILE *file, rtx insn, rtx *opvec ATTRIBUTE_UNUSED, int noperands ATTRIBUTE_UNUSED)
+static void mapip2_target_asm_final_postscan_insn (FILE *file, rtx insn, rtx *opvec ATTRIBUTE_UNUSED, int noperands ATTRIBUTE_UNUSED)
 {
 	if(GET_CODE(insn) == CALL_INSN)
 	{
@@ -783,7 +787,15 @@ static void TARGET_ASM_FINAL_POSTSCAN_INSN (FILE *file, rtx insn, rtx *opvec ATT
 			use = XEXP(usage, 0);
 			gcc_assert(GET_CODE(use) == USE);
 			reg = XEXP(use, 0);
+#if 0
 			gcc_assert(GET_CODE(reg) == REG);
+#else
+			if(GET_CODE(reg) != REG)
+			{
+				usage = XEXP(usage, 1);
+				continue;
+			}
+#endif
 #if DEBUG_POSTSCAN
 			fprintf(file, "reg: ");
 			print_rtl(file, reg);
@@ -798,6 +810,7 @@ static void TARGET_ASM_FINAL_POSTSCAN_INSN (FILE *file, rtx insn, rtx *opvec ATT
 
 			switch(mode) {
 			case TImode:
+			case CDImode:
 				regno += 2;
 				/* intentional fallthrough */
 			case DImode:
@@ -807,6 +820,8 @@ static void TARGET_ASM_FINAL_POSTSCAN_INSN (FILE *file, rtx insn, rtx *opvec ATT
 			case SImode:
 			case HImode:
 			case QImode:
+			case CQImode:
+			case CHImode:
 				if(!(regno >= P0_REGNUM && regno <= P3_REGNUM))
 					printf("Bad register %i in %smode\n", regno, GET_MODE_NAME(mode));
 				gcc_assert(regno >= P0_REGNUM && regno <= P3_REGNUM);
@@ -877,8 +892,7 @@ static void TARGET_ASM_FINAL_POSTSCAN_INSN (FILE *file, rtx insn, rtx *opvec ATT
 	}
 }
 
-#undef  TARGET_ASM_FUNCTION_EPILOGUE
-static void TARGET_ASM_FUNCTION_EPILOGUE (FILE *file ATTRIBUTE_UNUSED, HOST_WIDE_INT size ATTRIBUTE_UNUSED)
+static void mapip2_target_asm_function_epilogue (FILE *file ATTRIBUTE_UNUSED, HOST_WIDE_INT size ATTRIBUTE_UNUSED)
 {
 #if DEBUG_PROLOGUE
 	fprintf(file, "// epilogue %li\n", size);
@@ -887,10 +901,6 @@ static void TARGET_ASM_FUNCTION_EPILOGUE (FILE *file ATTRIBUTE_UNUSED, HOST_WIDE
 	/* because mapip2_expand_epilogue() doesn't always get called. */
 	frame_info.valid = 0;
 }
-
-#undef TARGET_PROMOTE_PROTOTYPES
-#define TARGET_PROMOTE_PROTOTYPES hook_bool_const_tree_true
-
 
 
 /* Initialize the GCC target structure.  */
