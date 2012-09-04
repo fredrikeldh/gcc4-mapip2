@@ -40,8 +40,8 @@ progpref=mapip2-
 
 #export CFLAGS='-O2 -pipe -Werror -Wno-unused-result'
 #export CXXFLAGS='-O2 -pipe -Werror -Wno-unused-result'
-export CFLAGS='-g -pipe -Werror'
-export CXXFLAGS='-g -pipe -Werror'
+export CFLAGS='-g -pipe -Werror -Wno-pedantic-ms-format'
+export CXXFLAGS='-g -pipe -Werror -Wno-pedantic-ms-format'
 export LDFLAGS=''
 export DEBUG_FLAGS=''
 

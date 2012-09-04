@@ -1817,6 +1817,7 @@ mapip2-*)
 	tm_file="newlib-stdint.h ${tm_file}"
 	tmake_file=mapip2/t-mapip2
 	inhibit_libc=true
+	need_64bit_hwint=yes
 	;;
 mcore-*-elf)
 	tm_file="dbxelf.h elfos.h newlib-stdint.h ${tm_file} mcore/mcore-elf.h"

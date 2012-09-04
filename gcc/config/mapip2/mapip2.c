@@ -615,6 +615,7 @@ static void mapip2_target_print_operand (FILE* file, rtx x, int letter)
 			fputc('#', file);
 			fprintf (file, HOST_WIDE_INT_PRINT_HEX, hwi);
 			fputs("\t\t// DImode", file);
+			gcc_assert(sizeof(HOST_WIDE_INT) >= 8);
 			return;
 		}
 
