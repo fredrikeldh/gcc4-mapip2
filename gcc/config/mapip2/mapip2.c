@@ -570,7 +570,7 @@ static void mapip2_target_print_operand (FILE* file, rtx x, int letter)
 			fputc('#', file);
 			REAL_VALUE_FROM_CONST_DOUBLE (d.r, x);
 			REAL_VALUE_TO_TARGET_SINGLE (d.r, f.l);
-			fprintf (file, HOST_WIDE_INT_PRINT_HEX, f.l);
+			fprintf (file, "0x%x", (unsigned)f.l);
 			fprintf(file, "\t\t// d(%.12g) f(%.6g)", d.d, f.f);
 			return;
 		}
