@@ -760,6 +760,7 @@ static void mapip2_target_asm_function_end_prologue (FILE *file)
 }
 
 #define DEBUG_POSTSCAN 0
+#define STAB_USE_DOT 0
 
 static void mapip2_target_asm_final_postscan_insn (FILE *file, rtx insn, rtx *opvec ATTRIBUTE_UNUSED, int noperands ATTRIBUTE_UNUSED)
 {
@@ -769,6 +770,10 @@ static void mapip2_target_asm_final_postscan_insn (FILE *file, rtx insn, rtx *op
 		int iregs = 0;
 		int fregs = 0;
 		const char* returnType;
+#if !STAB_USE_DOT
+		static int labelNum = 0;
+		ASM_OUTPUT_DEBUG_LABEL(file, "LMOSYNC", ++labelNum);
+#endif
 		/*print_rtl(file, insn);*/
 		fprintf(file, "\t.stabs\t\"");
 		while(usage)
@@ -888,8 +893,13 @@ static void mapip2_target_asm_final_postscan_insn (FILE *file, rtx insn, rtx *op
 
 		fprintf(file, "%s,%i,%i", returnType, iregs, fregs);
 
+#if STAB_USE_DOT
 		fprintf(file, "\",%d,1,0,.\n",
 			N_MOSYNC);
+#else
+		fprintf(file, "\",%d,1,0,LMOSYNC%i\n",
+			N_MOSYNC, labelNum);
+#endif
 	}
 }
 
