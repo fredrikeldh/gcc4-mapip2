@@ -751,7 +751,9 @@ static void mapip2_target_asm_function_end_prologue (FILE *file)
 			case DFmode: mtype = "double"; break;
 			case SImode: mtype = "int"; break;
 			case DImode: mtype = "long"; break;
-			default: mtype = "?"; break;
+			case SCmode:
+			case DCmode: mtype = "complexFloat"; break;
+			default: mtype = GET_MODE_NAME(GET_MODE(x)); break;
 		}
 	}
 
