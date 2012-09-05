@@ -481,7 +481,9 @@ static rtx mapip2_target_libcall_value (enum machine_mode mode, const_rtx fun AT
 		regnum = FR8_REGNUM;
 	else
 		regnum = R0_REGNUM;
+#if 0
 	printf("mapip2_target_libcall_value(%smode): %i\n", GET_MODE_NAME(mode), regnum);
+#endif
 	return gen_rtx_REG(mode, regnum);
 }
 
