@@ -1224,7 +1224,7 @@ ipcp_process_devirtualization_opportunities (struct cgraph_node *node)
     {
       int param_index, types_count, j;
       HOST_WIDE_INT token;
-      tree target, delta;
+      tree target, delta = NULL_TREE;
 
       next_ie = ie->next_callee;
       if (!ie->indirect_info->polymorphic)

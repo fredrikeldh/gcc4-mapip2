@@ -865,7 +865,7 @@ lto_output_ts_decl_common_tree_pointers (struct output_block *ob, tree expr,
 							      vnode))
 	    initial = NULL;
 	}
-    
+
       lto_output_tree_or_ref (ob, initial, ref_p);
     }
 
@@ -2406,7 +2406,7 @@ write_symbol (struct lto_streamer_cache_d *cache,
 {
   const char *name;
   enum gcc_plugin_symbol_kind kind;
-  enum gcc_plugin_symbol_visibility visibility;
+  enum gcc_plugin_symbol_visibility visibility = GCCPV_DEFAULT;
   int slot_num;
   unsigned HOST_WIDEST_INT size;
   const char *comdat;
@@ -2539,7 +2539,7 @@ produce_symtab (struct output_block *ob,
   seen = pointer_set_create ();
   memset (&stream, 0, sizeof (stream));
 
-  /* Write all functions. 
+  /* Write all functions.
      First write all defined functions and the write all used functions.
      This is done so only to handle duplicated symbols in cgraph.  */
   for (i = 0; i < lto_cgraph_encoder_size (encoder); i++)
@@ -2582,7 +2582,7 @@ produce_symtab (struct output_block *ob,
 	 into the output. */
       if (DECL_COMDAT (vnode->decl)
 	  && !vnode->force_output
-	  && vnode->finalized 
+	  && vnode->finalized
 	  && DECL_VIRTUAL_P (vnode->decl))
 	continue;
       if (vnode->alias)
@@ -2598,7 +2598,7 @@ produce_symtab (struct output_block *ob,
 	continue;
       if (DECL_COMDAT (vnode->decl)
 	  && !vnode->force_output
-	  && vnode->finalized 
+	  && vnode->finalized
 	  && DECL_VIRTUAL_P (vnode->decl))
 	continue;
       if (vnode->alias)

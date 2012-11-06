@@ -184,6 +184,8 @@ build/gengtype-lex.o-warn = -Wno-error
 # mips-tfile.c contains -Wcast-qual warnings.
 mips-tfile.o-warn = -Wno-error
 expmed.o-warn = -Wno-error
+# needed on OSX 10.6 (i686-apple-darwin10-gcc-4.2.1)
+ipa-split.o-warn = -Wno-uninitialized
 
 # All warnings have to be shut off in stage1 if the compiler used then
 # isn't gcc; configure determines that.  WARN_CFLAGS will be either
@@ -1843,7 +1845,7 @@ checksum-options:
 
 # compute checksum over all object files and the options
 cc1-checksum.c : build/genchecksum$(build_exeext) checksum-options \
-	$(C_OBJS) $(BACKEND) $(LIBDEPS) 
+	$(C_OBJS) $(BACKEND) $(LIBDEPS)
 	build/genchecksum$(build_exeext) $(C_OBJS) $(BACKEND) $(LIBDEPS) \
                      checksum-options > cc1-checksum.c.tmp && 		 \
 	$(srcdir)/../move-if-change cc1-checksum.c.tmp cc1-checksum.c
@@ -2999,7 +3001,7 @@ ipa-prop.o : ipa-prop.c $(CONFIG_H) $(SYSTEM_H) coretypes.h \
    tree-pretty-print.h gimple-pretty-print.h $(LTO_STREAMER_H)
 ipa-ref.o : ipa-ref.c $(CONFIG_H) $(SYSTEM_H) coretypes.h \
    langhooks.h $(GGC_H) $(TARGET_H) $(CGRAPH_H)  $(TREE_H) $(TARGET_H) \
-   $(TREE_FLOW_H) $(TM_H) $(TREE_PASS_H) $(FLAGS_H) $(TREE_H) $(GGC_H) 
+   $(TREE_FLOW_H) $(TM_H) $(TREE_PASS_H) $(FLAGS_H) $(TREE_H) $(GGC_H)
 ipa-cp.o : ipa-cp.c $(CONFIG_H) $(SYSTEM_H) coretypes.h  \
    $(TREE_H) $(TARGET_H) $(GIMPLE_H) $(CGRAPH_H) $(IPA_PROP_H) $(TREE_FLOW_H) \
    $(TREE_PASS_H) $(FLAGS_H) $(TIMEVAR_H) $(DIAGNOSTIC_H) $(TREE_DUMP_H) \
@@ -3169,7 +3171,7 @@ profile.o : profile.c $(CONFIG_H) $(SYSTEM_H) coretypes.h $(TM_H) $(RTL_H) \
    $(DIAGNOSTIC_CORE_H) $(COVERAGE_H) $(TREE_FLOW_H) value-prof.h cfghooks.h \
    $(CFGLOOP_H) $(TIMEVAR_H) $(TREE_PASS_H) profile.h
 mcf.o : mcf.c profile.h $(CONFIG_H) $(SYSTEM_H) $(TM_H) coretypes.h \
-   $(BASIC_BLOCK_H) output.h langhooks.h $(GCOV_IO_H) $(TREE_H) 
+   $(BASIC_BLOCK_H) output.h langhooks.h $(GCOV_IO_H) $(TREE_H)
 tree-profile.o : tree-profile.c $(CONFIG_H) $(SYSTEM_H) coretypes.h \
    $(TM_H) $(TREE_H) $(FLAGS_H) $(REGS_H) $(EXPR_H) $(FUNCTION_H) \
    $(BASIC_BLOCK_H) $(DIAGNOSTIC_CORE_H) $(COVERAGE_H) $(TREE_H) value-prof.h $(TREE_DUMP_H) \
@@ -3774,7 +3776,7 @@ ALL_GTFILES_H := $(sort $(GTFILES_H) $(GTFILES_LANG_H))
 $(ALL_GTFILES_H) gtype-desc.c gtype-desc.h : s-gtype ; @true
 
 ### Common flags to gengtype [e.g. -v or -B backupdir]
-GENGTYPE_FLAGS= 
+GENGTYPE_FLAGS=
 
 gtyp-input.list: s-gtyp-input ; @true
 s-gtyp-input: Makefile

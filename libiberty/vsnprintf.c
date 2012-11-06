@@ -55,6 +55,7 @@ used.
 
 #include "libiberty.h"
 
+#if 0
 /* This implementation relies on a working vasprintf.  */
 int
 vsnprintf (char *s, size_t n, const char *format, va_list ap)
@@ -84,6 +85,7 @@ vsnprintf (char *s, size_t n, const char *format, va_list ap)
   free (buf);
   return result;
 }
+#endif
 
 #ifdef TEST
 /* Set the buffer to a known state.  */
@@ -110,7 +112,7 @@ main (void)
 {
   char buf[128];
   int status;
-  
+
   CLEAR (buf);
   status = checkit (buf, 10, "%s:%d", "foobar", 9);
   VERIFY (status==8 && memcmp (buf, "foobar:9\0XXXXX\0", 15) == 0);
